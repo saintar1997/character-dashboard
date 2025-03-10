@@ -46,9 +46,8 @@ const Dashboard = () => {
     // Load the CSV file
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `${process.env.PUBLIC_URL}/Game_History.csv`
-        );
+        // As a last resort (not ideal but will work)
+const response = await fetch('https://saintar1997.github.io/character-dashboard/Game_History.csv');
         const csvText = await response.text();
 
         const result = Papa.parse(csvText, {
