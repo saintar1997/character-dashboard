@@ -1183,8 +1183,8 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                 }}
               >
                 <option value="none">All Lane</option>
-                {/* <option value="char1Lane">Filter by First Character Lane</option> */}
-                {/* <option value="char2Lane">Filter by Second Character Lane</option> */}
+                <option value="char1Lane">Filter by First Character Lane</option>
+                <option value="char2Lane">Filter by Second Character Lane</option>
                 <option value="either">Filter by Either Lane</option>
                 {/* <option value="both">Show Only Same Lane Pairs</option> */}
               </select>
