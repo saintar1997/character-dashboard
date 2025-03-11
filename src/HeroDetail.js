@@ -10,6 +10,7 @@ import {
   PieChart,
   Pie,
   Cell,
+  Legend,
 } from 'recharts';
 
 // Hero Detail modal component
@@ -21,8 +22,19 @@ const HeroDetail = ({
   synergies,
   counters,
   data,
+  isMobile = false, // Default to false if not provided
 }) => {
   if (!hero) return null;
+
+  // Process counters data to ensure pick and against fields are available
+  const processedCounters = counters.map(counter => {
+    const [pick, against] = counter.matchup.split(" vs ");
+    return {
+      ...counter,
+      pick,
+      against
+    };
+  });
 
   // Get hero stats from characterStats
   const heroStat = characterStats[hero] || {
@@ -69,16 +81,6 @@ const HeroDetail = ({
       otherHero,
       heroLane,
       otherHeroLane
-    };
-  });
-
-  // Parse matchup data from counters
-  const processedCounters = counters.map(counter => {
-    const [pick, against] = counter.matchup.split(" vs ");
-    return {
-      ...counter,
-      pick,
-      against
     };
   });
 
@@ -134,6 +136,17 @@ const HeroDetail = ({
     }
   }
 
+  // Table container style for horizontal scrolling on mobile
+  const tableContainerStyle = {
+    overflowX: 'auto',
+    width: '100%',
+    WebkitOverflowScrolling: 'touch',
+    marginBottom: '15px'
+  };
+
+  // Chart height adjustment for mobile
+  const chartHeight = isMobile ? 200 : 300;
+
   return (
     <div className="hero-detail-modal">
       <div className="hero-detail-content">
@@ -176,7 +189,7 @@ const HeroDetail = ({
                 </div>
               </div>
 
-              <div className="chart-container" style={{ height: '200px' }}>
+              <div className="chart-container" style={{ height: chartHeight }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -184,18 +197,20 @@ const HeroDetail = ({
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      outerRadius={80}
+                      outerRadius={isMobile ? 60 : 80}
                       fill="#8884d8"
                       dataKey="value"
                       nameKey="name"
-                      label={({ name, percent }) => 
-                        `${name}: ${(percent * 100).toFixed(1)}%`}
+                      label={isMobile
+                        ? ({ name, percent }) => `${(percent * 100).toFixed(1)}%`
+                        : ({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
                     >
                       {winLossData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip formatter={(value) => [value, 'Games']} />
+                    {!isMobile && <Legend />}
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -204,33 +219,47 @@ const HeroDetail = ({
             {/* Lane Performance */}
             <div className="content-card">
               <h3 className="section-title">Lane Performance</h3>
-              <table className="data-table-sm">
-                <thead>
-                  <tr>
-                    <th>Lane</th>
-                    <th className="text-right">Pick Count</th>
-                    <th className="text-right">Win Count</th>
-                    <th className="text-right">Win Rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lanes.map(lane => (
-                    <tr key={lane}>
-                      <td>{formatLaneName(lane)}</td>
-                      <td className="text-right">{heroLaneData[lane].pickCount}</td>
-                      <td className="text-right">{heroLaneData[lane].winCount}</td>
-                      <td className="text-right">{heroLaneData[lane].winRate}%</td>
+              <div style={tableContainerStyle}>
+                <table className="data-table-sm">
+                  <thead>
+                    <tr>
+                      <th>Lane</th>
+                      <th className="text-right">Pick Count</th>
+                      <th className="text-right">Win Count</th>
+                      <th className="text-right">Win Rate</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {lanes.map(lane => (
+                      <tr key={lane}>
+                        <td>{isMobile 
+                          ? formatLaneName(lane).split(' ')[0]
+                          : formatLaneName(lane)}
+                        </td>
+                        <td className="text-right">{heroLaneData[lane].pickCount}</td>
+                        <td className="text-right">{heroLaneData[lane].winCount}</td>
+                        <td className="text-right">{heroLaneData[lane].winRate}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               
-              <div className="chart-container" style={{ height: '200px', marginTop: '20px' }}>
+              <div className="chart-container" style={{ height: chartHeight, marginTop: '20px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={laneWinRateData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis label={{ value: 'Win Rate (%)', angle: -90, position: 'insideLeft' }} />
+                    <XAxis 
+                      dataKey="name" 
+                      tick={isMobile ? { fontSize: 10 } : {}}
+                      tickFormatter={isMobile 
+                        ? (lane) => lane.split(' ')[0] // Just show "Dark", "Farm", etc. on mobile
+                        : (lane) => lane}
+                    />
+                    <YAxis label={isMobile 
+                      ? null
+                      : { value: 'Win Rate (%)', angle: -90, position: 'insideLeft' }} 
+                    />
                     <Tooltip formatter={(value, name, props) => [
                       `${value}% (${props.payload.pickCount} games)`, 'Win Rate'
                     ]} />
@@ -244,15 +273,15 @@ const HeroDetail = ({
           {/* Synergies */}
           <div className="content-card" style={{ marginTop: '20px' }}>
             <h3 className="section-title">Best Synergies with {hero}</h3>
-            <div style={{ overflowX: 'auto' }}>
+            <div style={tableContainerStyle}>
               <table className="data-table">
                 <thead>
                   <tr>
                     <th>Partner Hero</th>
                     <th>Partner Lane</th>
-                    <th>{hero}'s Lane</th>
-                    <th className="text-right">Games Together</th>
-                    <th className="text-right">Wins</th>
+                    {!isMobile && <th>{hero}'s Lane</th>}
+                    <th className="text-right">Games</th>
+                    {!isMobile && <th className="text-right">Wins</th>}
                     <th className="text-right">Win Rate</th>
                   </tr>
                 </thead>
@@ -262,13 +291,23 @@ const HeroDetail = ({
                     .map((synergy, index) => (
                       <tr key={index}>
                         <td>{synergy.otherHero}</td>
-                        <td>{formatLaneName(synergy.otherHeroLane)}</td>
-                        <td>{formatLaneName(synergy.heroLane)}</td>
+                        <td>{isMobile 
+                          ? formatLaneName(synergy.otherHeroLane).split(' ')[0] 
+                          : formatLaneName(synergy.otherHeroLane)}
+                        </td>
+                        {!isMobile && <td>{formatLaneName(synergy.heroLane)}</td>}
                         <td className="text-right">{synergy.games}</td>
-                        <td className="text-right">{synergy.wins}</td>
+                        {!isMobile && <td className="text-right">{synergy.wins}</td>}
                         <td className="text-right">{synergy.winRate}%</td>
                       </tr>
                     ))}
+                  {heroSynergies.length === 0 && (
+                    <tr>
+                      <td colSpan={isMobile ? 4 : 6} style={{ textAlign: 'center', padding: '20px 0' }}>
+                        No synergy data available
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -278,51 +317,75 @@ const HeroDetail = ({
             {/* Good Against */}
             <div className="content-card">
               <h3 className="section-title">{hero} Counters These Heroes</h3>
-              <table className="data-table-sm">
-                <thead>
-                  <tr>
-                    <th>Hero</th>
-                    <th>Enemy Lane</th>
-                    <th className="text-right">Games</th>
-                    <th className="text-right">Win Rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {goodAgainst.slice(0, 10).map((counter, index) => (
-                    <tr key={index}>
-                      <td>{counter.against}</td>
-                      <td>{formatLaneName(counter.againstLane)}</td>
-                      <td className="text-right">{counter.games}</td>
-                      <td className="text-right">{counter.winRate}%</td>
+              <div style={tableContainerStyle}>
+                <table className="data-table-sm">
+                  <thead>
+                    <tr>
+                      <th>Hero</th>
+                      <th>Enemy Lane</th>
+                      <th className="text-right">Games</th>
+                      <th className="text-right">Win Rate</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {goodAgainst.slice(0, 10).map((counter, index) => (
+                      <tr key={index}>
+                        <td>{counter.against}</td>
+                        <td>{isMobile 
+                          ? formatLaneName(counter.againstLane).split(' ')[0] 
+                          : formatLaneName(counter.againstLane)}
+                        </td>
+                        <td className="text-right">{counter.games}</td>
+                        <td className="text-right">{counter.winRate}%</td>
+                      </tr>
+                    ))}
+                    {goodAgainst.length === 0 && (
+                      <tr>
+                        <td colSpan="4" style={{ textAlign: 'center', padding: '20px 0' }}>
+                          No counter data available
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* Bad Against */}
             <div className="content-card">
               <h3 className="section-title">These Heroes Counter {hero}</h3>
-              <table className="data-table-sm">
-                <thead>
-                  <tr>
-                    <th>Hero</th>
-                    <th>Enemy Lane</th>
-                    <th className="text-right">Games</th>
-                    <th className="text-right">Win Rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {badAgainst.slice(0, 10).map((counter, index) => (
-                    <tr key={index}>
-                      <td>{counter.pick}</td>
-                      <td>{formatLaneName(counter.pickLane)}</td>
-                      <td className="text-right">{counter.games}</td>
-                      <td className="text-right">{counter.winRate}%</td>
+              <div style={tableContainerStyle}>
+                <table className="data-table-sm">
+                  <thead>
+                    <tr>
+                      <th>Hero</th>
+                      <th>Enemy Lane</th>
+                      <th className="text-right">Games</th>
+                      <th className="text-right">Win Rate</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {badAgainst.slice(0, 10).map((counter, index) => (
+                      <tr key={index}>
+                        <td>{counter.pick}</td>
+                        <td>{isMobile 
+                          ? formatLaneName(counter.pickLane).split(' ')[0] 
+                          : formatLaneName(counter.pickLane)}
+                        </td>
+                        <td className="text-right">{counter.games}</td>
+                        <td className="text-right">{counter.winRate}%</td>
+                      </tr>
+                    ))}
+                    {badAgainst.length === 0 && (
+                      <tr>
+                        <td colSpan="4" style={{ textAlign: 'center', padding: '20px 0' }}>
+                          No counter data available
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

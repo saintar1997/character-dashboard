@@ -17,6 +17,7 @@
 
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   border-bottom: 1px solid #ccc;
   margin-bottom: 20px;
 }
@@ -25,6 +26,7 @@
   padding: 8px 16px;
   cursor: pointer;
   margin-right: 4px;
+  margin-bottom: 4px;
   border-radius: 4px 4px 0 0;
 }
 
@@ -84,6 +86,7 @@
 /* Lane tabs styling */
 .lane-tabs {
   display: flex;
+  flex-wrap: wrap;
   margin-bottom: 15px;
 }
 
@@ -91,6 +94,7 @@
   padding: 6px 12px;
   cursor: pointer;
   margin-right: 4px;
+  margin-bottom: 4px;
   border-radius: 4px;
   border: 1px solid #ddd;
 }
@@ -130,16 +134,11 @@
   gap: 20px;
 }
 
-@media (max-width: 768px) {
-  .two-column-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* Search container */
 .search-container {
   margin-bottom: 20px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
 }
 
@@ -150,6 +149,7 @@
   font-size: 16px;
   width: 300px;
   max-width: 100%;
+  margin-bottom: 8px;
 }
 
 .search-input:focus {
@@ -215,12 +215,14 @@
   border-top: 5px solid #333;
 }
 
-/* Hero name link styling */
+/* Hero name link styling - CRITICAL for click functionality */
 .hero-name-link {
   color: #4a90e2;
   cursor: pointer;
   text-decoration: underline;
   transition: color 0.2s;
+  display: inline-block; /* Improves touch target on mobile */
+  padding: 2px 0; /* Slightly larger touch target */
 }
 
 .hero-name-link:hover {
@@ -320,17 +322,145 @@
   color: #333;
 }
 
-/* Responsive adjustments */
+/* Table container for horizontal scrolling */
+.data-table-container {
+  overflow-x: auto;
+  width: 100%;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  margin-bottom: 16px;
+}
+
+/* Responsive styles */
 @media (max-width: 768px) {
+  .dashboard-container {
+    padding: 10px;
+  }
+  
+  .dashboard-title {
+    font-size: 20px;
+  }
+  
+  .section-title {
+    font-size: 16px;
+  }
+  
+  .tab {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+  
+  .lane-tab {
+    flex: 1 0 auto;
+    padding: 6px 8px;
+    margin: 2px;
+    text-align: center;
+    font-size: 13px;
+  }
+  
+  .data-table, .data-table-sm {
+    font-size: 13px;
+  }
+  
+  .data-table th, 
+  .data-table td,
+  .data-table-sm th,
+  .data-table-sm td {
+    padding: 6px 4px;
+  }
+  
+  .chart-container {
+    height: 300px;
+  }
+  
+  .hero-detail-modal {
+    padding: 10px;
+  }
+  
   .hero-detail-content {
     width: 100%;
-    max-width: 100%;
-    height: 100%;
-    max-height: 100%;
-    border-radius: 0;
+    max-height: 95vh;
+    margin: 0;
+  }
+  
+  .hero-detail-header h2 {
+    font-size: 18px;
+  }
+  
+  .hero-detail-body {
+    padding: 15px;
   }
   
   .hero-summary {
     grid-template-columns: 1fr;
+  }
+  
+  .search-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .search-input {
+    width: 100%;
+  }
+  
+  .search-button {
+    margin-left: 0;
+    margin-top: 5px;
+  }
+  
+  .two-column-layout {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-detail-modal {
+    padding: 0;
+  }
+  
+  .hero-detail-content {
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .hero-detail-header {
+    padding: 12px 15px;
+  }
+  
+  .hero-detail-body {
+    padding: 10px;
+  }
+  
+  .chart-container {
+    height: 250px;
+  }
+  
+  .tab, .lane-tab {
+    font-size: 12px;
+    padding: 5px 6px;
+  }
+}
+
+/* Print styles for reports */
+@media print {
+  .dashboard-container {
+    max-width: none;
+    padding: 0;
+  }
+  
+  .tabs, .search-container, .close-button {
+    display: none !important;
+  }
+  
+  .content-card {
+    box-shadow: none;
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+  }
+  
+  .chart-container {
+    height: 300px;
+    page-break-inside: avoid;
   }
 }

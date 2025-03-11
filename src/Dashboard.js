@@ -28,6 +28,9 @@ const Dashboard = () => {
   // Add state for hero details modal
   const [selectedHero, setSelectedHero] = useState(null);
 
+  // Add state for responsive design
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
   // Add a new state for counter search mode
   const [counterSearchMode, setCounterSearchMode] = useState("pick"); // 'pick', 'against', or 'both'
 
@@ -45,6 +48,32 @@ const Dashboard = () => {
     key: "pickCount",
     direction: "desc",
   });
+
+  // Handler for clicking on a hero name
+  const handleHeroClick = (heroName) => {
+    setSelectedHero(heroName);
+  };
+
+  // Handler for closing the hero detail modal
+  const handleHeroDetailClose = () => {
+    setSelectedHero(null);
+  };
+
+  // Listen for window resize to detect mobile view
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    
+    // Initial check
+    handleResize();
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     // Load the CSV file
@@ -104,16 +133,6 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
 
     setFilteredStats(filtered);
   }, [searchQuery, characterStats]);
-
-  // Handler for clicking on a hero name
-  const handleHeroClick = (heroName) => {
-    setSelectedHero(heroName);
-  };
-
-  // Handler for closing the hero detail modal
-  const handleHeroDetailClose = () => {
-    setSelectedHero(null);
-  };
 
   // Function to split a comma-separated string into an array
   const splitCharacters = (str) => {
@@ -625,22 +644,37 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
     });
   };
 
+  // Style adjustments for responsive design
   const searchModeStyle = {
-    marginLeft: "10px",
+    marginLeft: isMobile ? "0" : "10px",
+    marginTop: isMobile ? "10px" : "0",
     display: "flex",
-    alignItems: "center",
+    flexDirection: isMobile ? "column" : "row",
+    alignItems: isMobile ? "flex-start" : "center",
+    width: isMobile ? "100%" : "auto",
   };
 
   const radioLabelStyle = {
-    marginRight: "15px",
+    marginRight: isMobile ? "0" : "15px",
+    marginBottom: isMobile ? "8px" : "0",
     display: "flex",
     alignItems: "center",
     cursor: "pointer",
+    width: isMobile ? "100%" : "auto",
   };
 
   const radioInputStyle = {
     marginRight: "5px",
     cursor: "pointer",
+  };
+
+  // Function to create table containers with horizontal scrolling for mobile
+  const renderTableContainer = (tableContent) => {
+    return (
+      <div className="data-table-container">
+        {tableContent}
+      </div>
+    );
   };
 
   // Get top characters by pick rate for chart
@@ -785,6 +819,33 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
     );
   };
 
+  // Filter controls style for responsive design
+  const filterControlsStyle = {
+    marginBottom: '15px',
+    display: 'flex',
+    flexDirection: isMobile ? 'column' : 'row',
+    flexWrap: isMobile ? 'nowrap' : 'wrap',
+    alignItems: isMobile ? 'flex-start' : 'center',
+    width: '100%',
+  };
+
+  const filterGroupStyle = {
+    marginRight: isMobile ? '0' : '20px',
+    marginBottom: isMobile ? '10px' : '0',
+    display: 'flex',
+    flexDirection: isMobile ? 'column' : 'row',
+    alignItems: isMobile ? 'flex-start' : 'center',
+    width: isMobile ? '100%' : 'auto',
+  };
+
+  const selectStyle = {
+    padding: '6px 12px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
+    width: isMobile ? '100%' : 'auto',
+    marginTop: isMobile ? '5px' : '0',
+  };
+
   if (loading) {
     return <div className="dashboard-container">Loading data...</div>;
   }
@@ -831,8 +892,8 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
             onChange={handleSearchChange}
           />
 
-          <div style={searchModeStyle}>
-            <label style={radioLabelStyle}>
+          <div style={searchModeStyle} className="search-modes">
+            <label style={radioLabelStyle} className="radio-label">
               <input
                 type="radio"
                 name="counterSearchMode"
@@ -844,7 +905,7 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
               Search "Pick This" column
             </label>
 
-            <label style={radioLabelStyle}>
+            <label style={radioLabelStyle} className="radio-label">
               <input
                 type="radio"
                 name="counterSearchMode"
@@ -856,7 +917,7 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
               Search "Against" column
             </label>
 
-            <label style={radioLabelStyle}>
+            <label style={radioLabelStyle} className="radio-label">
               <input
                 type="radio"
                 name="counterSearchMode"
@@ -960,13 +1021,12 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                   angle={-45}
                   textAnchor="end"
                   height={70}
+                  tick={isMobile ? { fontSize: 10 } : {}}
                 />
                 <YAxis
-                  label={{
-                    value: "Pick Rate (%)",
-                    angle: -90,
-                    position: "insideLeft",
-                  }}
+                  label={isMobile 
+                    ? null
+                    : { value: "Pick Rate (%)", angle: -90, position: "insideLeft" }}
                 />
                 <Tooltip formatter={(value) => [`${value}%`, "Pick Rate"]} />
                 <Bar dataKey="pickRate" fill="#8884d8" name="Pick Rate" />
@@ -975,7 +1035,7 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
           </div>
 
           <h3 className="section-title">Character Statistics</h3>
-          <div style={{ overflowX: "auto" }}>
+          {renderTableContainer(
             <table className="data-table">
               <thead>
                 <tr>
@@ -1034,7 +1094,7 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                 ))}
               </tbody>
             </table>
-          </div>
+          )}
         </div>
       )}
 
@@ -1108,13 +1168,12 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                   angle={-45}
                   textAnchor="end"
                   height={70}
+                  tick={isMobile ? { fontSize: 10 } : {}}
                 />
                 <YAxis
-                  label={{
-                    value: "Win Rate (%)",
-                    angle: -90,
-                    position: "insideLeft",
-                  }}
+                  label={isMobile 
+                    ? null
+                    : { value: "Win Rate (%)", angle: -90, position: "insideLeft" }}
                 />
                 <Tooltip
                   formatter={(value, name, props) => [
@@ -1127,7 +1186,7 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
             </ResponsiveContainer>
           </div>
 
-          <div style={{ overflowX: "auto" }}>
+          {renderTableContainer(
             <table className="data-table">
               <thead>
                 <tr>
@@ -1176,7 +1235,7 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                 ))}
               </tbody>
             </table>
-          </div>
+          )}
         </div>
       )}
 
@@ -1187,55 +1246,33 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
             Character Synergies (Pairs with High Win Rates)
           </h2>
 
-          {/* Lane Filter Controls for Synergies */}
-          <div
-            style={{
-              marginBottom: "15px",
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-            }}
-          >
-            <div
-              style={{
-                marginRight: "20px",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <label style={{ marginRight: "10px", fontWeight: "bold" }}>
+          {/* Lane Filter Controls for Synergies - updated for responsive design */}
+          <div style={filterControlsStyle} className="filter-controls">
+            <div style={filterGroupStyle} className="filter-control-group">
+              <label style={{ marginRight: isMobile ? '0' : '10px', marginBottom: isMobile ? '5px' : '0', fontWeight: "bold" }}>
                 Lane Filter:
               </label>
               <select
                 value={synergyLaneFilterMode}
                 onChange={(e) => setSynergyLaneFilterMode(e.target.value)}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: "4px",
-                  border: "1px solid #ccc",
-                }}
+                style={selectStyle}
               >
                 <option value="none">All Lane</option>
                 <option value="char1Lane">Filter by First Character Lane</option>
                 <option value="char2Lane">Filter by Second Character Lane</option>
                 <option value="either">Filter by Either Lane</option>
-                {/* <option value="both">Show Only Same Lane Pairs</option> */}
               </select>
             </div>
 
             {synergyLaneFilterMode !== "none" && (
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <label style={{ marginRight: "10px", fontWeight: "bold" }}>
+              <div style={filterGroupStyle} className="filter-control-group">
+                <label style={{ marginRight: isMobile ? '0' : '10px', marginBottom: isMobile ? '5px' : '0', fontWeight: "bold" }}>
                   Select Lane:
                 </label>
                 <select
                   value={selectedSynergyLaneFilter}
                   onChange={(e) => setSelectedSynergyLaneFilter(e.target.value)}
-                  style={{
-                    padding: "6px 12px",
-                    borderRadius: "4px",
-                    border: "1px solid #ccc",
-                  }}
+                  style={selectStyle}
                 >
                   <option value="all">All Lanes</option>
                   <option value="dark">Dark Lane</option>
@@ -1272,81 +1309,89 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
           )}
 
           <div style={{ overflowY: "auto", maxHeight: "500px" }}>
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th
-                    className={`sortable ${getSortClass("pair")}`}
-                    onClick={() => requestSort("pair")}
-                  >
-                    Character Pair
-                    <span className="sort-indicator"></span>
-                  </th>
-                  <th
-                    className={`sortable ${getSortClass("lane1")}`}
-                    onClick={() => requestSort("lane1")}
-                  >
-                    First Lane
-                    <span className="sort-indicator"></span>
-                  </th>
-                  <th
-                    className={`sortable ${getSortClass("lane2")}`}
-                    onClick={() => requestSort("lane2")}
-                  >
-                    Second Lane
-                    <span className="sort-indicator"></span>
-                  </th>
-                  <th
-                    className={`sortable ${getSortClass("games")} text-right`}
-                    onClick={() => requestSort("games")}
-                  >
-                    Games
-                    <span className="sort-indicator"></span>
-                  </th>
-                  <th
-                    className={`sortable ${getSortClass("wins")} text-right`}
-                    onClick={() => requestSort("wins")}
-                  >
-                    Wins
-                    <span className="sort-indicator"></span>
-                  </th>
-                  <th
-                    className={`sortable ${getSortClass("winRate")} text-right`}
-                    onClick={() => requestSort("winRate")}
-                  >
-                    Win Rate
-                    <span className="sort-indicator"></span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {getSortedSynergies()
-                  .filter((pair) => pair.games >= 3)
-                  .map((pair, index) => {
-                    const char1 = pair.char1;
-                    const char2 = pair.char2;
-                    
-                    return (
-                      <tr key={index}>
-                        <td>
-                          <span className="hero-name-link" onClick={() => handleHeroClick(char1)}>
-                            {highlightText(char1)}
-                          </span>
-                          {" + "}
-                          <span className="hero-name-link" onClick={() => handleHeroClick(char2)}>
-                            {highlightText(char2)}
-                          </span>
-                        </td>
-                        <td>{formatLaneName(pair.lane1)}</td>
-                        <td>{formatLaneName(pair.lane2)}</td>
-                        <td className="text-right">{pair.games}</td>
-                        <td className="text-right">{pair.wins}</td>
-                        <td className="text-right">{pair.winRate}%</td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
+            {renderTableContainer(
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th
+                      className={`sortable ${getSortClass("pair")}`}
+                      onClick={() => requestSort("pair")}
+                    >
+                      Character Pair
+                      <span className="sort-indicator"></span>
+                    </th>
+                    <th
+                      className={`sortable ${getSortClass("lane1")}`}
+                      onClick={() => requestSort("lane1")}
+                    >
+                      First Lane
+                      <span className="sort-indicator"></span>
+                    </th>
+                    <th
+                      className={`sortable ${getSortClass("lane2")}`}
+                      onClick={() => requestSort("lane2")}
+                    >
+                      Second Lane
+                      <span className="sort-indicator"></span>
+                    </th>
+                    <th
+                      className={`sortable ${getSortClass("games")} text-right`}
+                      onClick={() => requestSort("games")}
+                    >
+                      Games
+                      <span className="sort-indicator"></span>
+                    </th>
+                    <th
+                      className={`sortable ${getSortClass("wins")} text-right`}
+                      onClick={() => requestSort("wins")}
+                    >
+                      Wins
+                      <span className="sort-indicator"></span>
+                    </th>
+                    <th
+                      className={`sortable ${getSortClass("winRate")} text-right`}
+                      onClick={() => requestSort("winRate")}
+                    >
+                      Win Rate
+                      <span className="sort-indicator"></span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {getSortedSynergies()
+                    .filter((pair) => pair.games >= 3)
+                    .map((pair, index) => {
+                      const char1 = pair.char1;
+                      const char2 = pair.char2;
+                      
+                      return (
+                        <tr key={index}>
+                          <td>
+                            <span className="hero-name-link" onClick={() => handleHeroClick(char1)}>
+                              {highlightText(char1)}
+                            </span>
+                            {" + "}
+                            <span className="hero-name-link" onClick={() => handleHeroClick(char2)}>
+                              {highlightText(char2)}
+                            </span>
+                          </td>
+                          <td>{isMobile 
+                            ? formatLaneName(pair.lane1).split(' ')[0] 
+                            : formatLaneName(pair.lane1)}
+                          </td>
+                          <td>{isMobile 
+                            ? formatLaneName(pair.lane2).split(' ')[0] 
+                            : formatLaneName(pair.lane2)}
+                          </td>
+                          <td className="text-right">{pair.games}</td>
+                          <td className="text-right">{pair.wins}</td>
+                          <td className="text-right">{pair.winRate}%</td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            )}
           </div>
 
           <div className="chart-container" style={{ marginTop: "20px" }}>
@@ -1369,13 +1414,12 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                   angle={-45}
                   textAnchor="end"
                   height={100}
+                  tick={isMobile ? { fontSize: 10 } : {}}
                 />
                 <YAxis
-                  label={{
-                    value: "Win Rate (%)",
-                    angle: -90,
-                    position: "insideLeft",
-                  }}
+                  label={isMobile 
+                    ? null
+                    : { value: "Win Rate (%)", angle: -90, position: "insideLeft" }}
                 />
                 <Tooltip
                   formatter={(value, name, props) => [
@@ -1395,99 +1439,103 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
               {/* First Column: Support + Carry Lane Synergies */}
               <div className="content-card">
                 <h4 className="section-title">Support + Farm Lane Duos</h4>
-                <table className="data-table-sm">
-                  <thead>
-                    <tr>
-                      <th>Support</th>
-                      <th>Farm Lane</th>
-                      <th className="text-right">Games</th>
-                      <th className="text-right">Win Rate</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {getSortedSynergies()
-                      .filter(
-                        (pair) =>
-                          (pair.lane1 === "support" && pair.lane2 === "farm") ||
-                          (pair.lane1 === "farm" && pair.lane2 === "support")
-                      )
-                      .filter((pair) => pair.games >= 3)
-                      .slice(0, 10)
-                      .map((pair, index) => {
-                        // Determine which character is support and which is farm
-                        const supportChar =
-                          pair.lane1 === "support" ? pair.char1 : pair.char2;
-                        const farmChar =
-                          pair.lane1 === "farm" ? pair.char1 : pair.char2;
+                {renderTableContainer(
+                  <table className="data-table-sm">
+                    <thead>
+                      <tr>
+                        <th>Support</th>
+                        <th>Farm Lane</th>
+                        <th className="text-right">Games</th>
+                        <th className="text-right">Win Rate</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getSortedSynergies()
+                        .filter(
+                          (pair) =>
+                            (pair.lane1 === "support" && pair.lane2 === "farm") ||
+                            (pair.lane1 === "farm" && pair.lane2 === "support")
+                        )
+                        .filter((pair) => pair.games >= 3)
+                        .slice(0, 10)
+                        .map((pair, index) => {
+                          // Determine which character is support and which is farm
+                          const supportChar =
+                            pair.lane1 === "support" ? pair.char1 : pair.char2;
+                          const farmChar =
+                            pair.lane1 === "farm" ? pair.char1 : pair.char2;
 
-                        return (
-                          <tr key={index}>
-                            <td>
-                              <span className="hero-name-link" onClick={() => handleHeroClick(supportChar)}>
-                                {supportChar}
-                              </span>
-                            </td>
-                            <td>
-                              <span className="hero-name-link" onClick={() => handleHeroClick(farmChar)}>
-                                {farmChar}
-                              </span>
-                            </td>
-                            <td className="text-right">{pair.games}</td>
-                            <td className="text-right">{pair.winRate}%</td>
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </table>
+                          return (
+                            <tr key={index}>
+                              <td>
+                                <span className="hero-name-link" onClick={() => handleHeroClick(supportChar)}>
+                                  {supportChar}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="hero-name-link" onClick={() => handleHeroClick(farmChar)}>
+                                  {farmChar}
+                                </span>
+                              </td>
+                              <td className="text-right">{pair.games}</td>
+                              <td className="text-right">{pair.winRate}%</td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                )}
               </div>
 
               {/* Second Column: Mid + Dark Lane Synergies */}
               <div className="content-card">
                 <h4 className="section-title">Mid + Dark Lane Duos</h4>
-                <table className="data-table-sm">
-                  <thead>
-                    <tr>
-                      <th>Mid Lane</th>
-                      <th>Dark Lane</th>
-                      <th className="text-right">Games</th>
-                      <th className="text-right">Win Rate</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {getSortedSynergies()
-                      .filter(
-                        (pair) =>
-                          (pair.lane1 === "mid" && pair.lane2 === "dark") ||
-                          (pair.lane1 === "dark" && pair.lane2 === "mid")
-                      )
-                      .filter((pair) => pair.games >= 3)
-                      .slice(0, 10)
-                      .map((pair, index) => {
-                        // Determine which character is mid and which is dark
-                        const midChar =
-                          pair.lane1 === "mid" ? pair.char1 : pair.char2;
-                        const darkChar =
-                          pair.lane1 === "dark" ? pair.char1 : pair.char2;
+                {renderTableContainer(
+                  <table className="data-table-sm">
+                    <thead>
+                      <tr>
+                        <th>Mid Lane</th>
+                        <th>Dark Lane</th>
+                        <th className="text-right">Games</th>
+                        <th className="text-right">Win Rate</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getSortedSynergies()
+                        .filter(
+                          (pair) =>
+                            (pair.lane1 === "mid" && pair.lane2 === "dark") ||
+                            (pair.lane1 === "dark" && pair.lane2 === "mid")
+                        )
+                        .filter((pair) => pair.games >= 3)
+                        .slice(0, 10)
+                        .map((pair, index) => {
+                          // Determine which character is mid and which is dark
+                          const midChar =
+                            pair.lane1 === "mid" ? pair.char1 : pair.char2;
+                          const darkChar =
+                            pair.lane1 === "dark" ? pair.char1 : pair.char2;
 
-                        return (
-                          <tr key={index}>
-                            <td>
-                              <span className="hero-name-link" onClick={() => handleHeroClick(midChar)}>
-                                {midChar}
-                              </span>
-                            </td>
-                            <td>
-                              <span className="hero-name-link" onClick={() => handleHeroClick(darkChar)}>
-                                {darkChar}
-                              </span>
-                            </td>
-                            <td className="text-right">{pair.games}</td>
-                            <td className="text-right">{pair.winRate}%</td>
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </table>
+                          return (
+                            <tr key={index}>
+                              <td>
+                                <span className="hero-name-link" onClick={() => handleHeroClick(midChar)}>
+                                  {midChar}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="hero-name-link" onClick={() => handleHeroClick(darkChar)}>
+                                  {darkChar}
+                                </span>
+                              </td>
+                              <td className="text-right">{pair.games}</td>
+                              <td className="text-right">{pair.winRate}%</td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
           </div>
@@ -1501,33 +1549,16 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
             Counter Picks (Characters that Win Against Specific Opponents)
           </h2>
 
-          {/* Lane Filter Controls */}
-          <div
-            style={{
-              marginBottom: "15px",
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-            }}
-          >
-            <div
-              style={{
-                marginRight: "20px",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <label style={{ marginRight: "10px", fontWeight: "bold" }}>
+          {/* Lane Filter Controls - updated for responsive design */}
+          <div style={filterControlsStyle} className="filter-controls">
+            <div style={filterGroupStyle} className="filter-control-group">
+              <label style={{ marginRight: isMobile ? '0' : '10px', marginBottom: isMobile ? '5px' : '0', fontWeight: "bold" }}>
                 Lane Filter:
               </label>
               <select
                 value={laneFilterMode}
                 onChange={(e) => setLaneFilterMode(e.target.value)}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: "4px",
-                  border: "1px solid #ccc",
-                }}
+                style={selectStyle}
               >
                 <option value="none">No Lane Filter</option>
                 <option value="pickLane">Filter by Pick Lane</option>
@@ -1538,18 +1569,14 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
             </div>
 
             {laneFilterMode !== "none" && (
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <label style={{ marginRight: "10px", fontWeight: "bold" }}>
+              <div style={filterGroupStyle} className="filter-control-group">
+                <label style={{ marginRight: isMobile ? '0' : '10px', marginBottom: isMobile ? '5px' : '0', fontWeight: "bold" }}>
                   Select Lane:
                 </label>
                 <select
                   value={selectedLaneFilter}
                   onChange={(e) => setSelectedLaneFilter(e.target.value)}
-                  style={{
-                    padding: "6px 12px",
-                    borderRadius: "4px",
-                    border: "1px solid #ccc",
-                  }}
+                  style={selectStyle}
                 >
                   <option value="all">All Lanes</option>
                   <option value="dark">Dark Lane</option>
@@ -1563,127 +1590,152 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
           </div>
 
           <div style={{ overflowY: "auto", maxHeight: "600px" }}>
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th
-                    className={`sortable ${getSortClass("pick")}`}
-                    onClick={() => requestSort("pick")}
-                  >
-                    Pick This
-                    <span className="sort-indicator"></span>
-                  </th>
-                  <th
-                    className={`sortable ${getSortClass("pickLane")}`}
-                    onClick={() => requestSort("pickLane")}
-                  >
-                    Pick Lane
-                    <span className="sort-indicator"></span>
-                  </th>
-                  <th
-                    className={`sortable ${getSortClass("against")}`}
-                    onClick={() => requestSort("against")}
-                  >
-                    Against
-                    <span className="sort-indicator"></span>
-                  </th>
-                  <th
-                    className={`sortable ${getSortClass("againstLane")}`}
-                    onClick={() => requestSort("againstLane")}
-                  >
-                    Against Lane
-                    <span className="sort-indicator"></span>
-                  </th>
-                  <th
-                    className={`sortable ${getSortClass("games")} text-right`}
-                    onClick={() => requestSort("games")}
-                  >
-                    Games
-                    <span className="sort-indicator"></span>
-                  </th>
-                  <th
-                    className={`sortable ${getSortClass("winRate")} text-right`}
-                    onClick={() => requestSort("winRate")}
-                  >
-                    Win Rate
-                    <span className="sort-indicator"></span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {getSortedCounters()
-                  .filter((counter) => counter.games >= 3)
-                  .map((counter, index) => (
-                    <tr key={index}>
-                      <td>
-                        <span className="hero-name-link" onClick={() => handleHeroClick(counter.pick)}>
-                          {counterSearchMode === "pick" || counterSearchMode === "both"
-                            ? highlightText(counter.pick)
-                            : counter.pick}
-                        </span>
-                      </td>
-                      <td>{formatLaneName(counter.pickLane)}</td>
-                      <td>
-                        <span className="hero-name-link" onClick={() => handleHeroClick(counter.against)}>
-                          {counterSearchMode === "against" || counterSearchMode === "both"
-                            ? highlightText(counter.against)
-                            : counter.against}
-                        </span>
-                      </td>
-                      <td>{formatLaneName(counter.againstLane)}</td>
-                      <td className="text-right">{counter.games}</td>
-                      <td className="text-right">{counter.winRate}%</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+            {renderTableContainer(
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th
+                      className={`sortable ${getSortClass("pick")}`}
+                      onClick={() => requestSort("pick")}
+                    >
+                      Pick This
+                      <span className="sort-indicator"></span>
+                    </th>
+                    <th
+                      className={`sortable ${getSortClass("pickLane")}`}
+                      onClick={() => requestSort("pickLane")}
+                    >
+                      Pick Lane
+                      <span className="sort-indicator"></span>
+                    </th>
+                    <th
+                      className={`sortable ${getSortClass("against")}`}
+                      onClick={() => requestSort("against")}
+                    >
+                      Against
+                      <span className="sort-indicator"></span>
+                    </th>
+                    <th
+                      className={`sortable ${getSortClass("againstLane")}`}
+                      onClick={() => requestSort("againstLane")}
+                    >
+                      Against Lane
+                      <span className="sort-indicator"></span>
+                    </th>
+                    <th
+                      className={`sortable ${getSortClass("games")} text-right`}
+                      onClick={() => requestSort("games")}
+                    >
+                      Games
+                      <span className="sort-indicator"></span>
+                    </th>
+                    <th
+                      className={`sortable ${getSortClass("winRate")} text-right`}
+                      onClick={() => requestSort("winRate")}
+                    >
+                      Win Rate
+                      <span className="sort-indicator"></span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {getSortedCounters()
+                    .filter((counter) => counter.games >= 3)
+                    .map((counter, index) => (
+                      <tr key={index}>
+                        <td>
+                          <span className="hero-name-link" onClick={() => handleHeroClick(counter.pick)}>
+                            {counterSearchMode === "pick" || counterSearchMode === "both"
+                              ? highlightText(counter.pick)
+                              : counter.pick}
+                          </span>
+                        </td>
+                        <td>{isMobile 
+                          ? formatLaneName(counter.pickLane).split(' ')[0] 
+                          : formatLaneName(counter.pickLane)}
+                        </td>
+                        <td>
+                          <span className="hero-name-link" onClick={() => handleHeroClick(counter.against)}>
+                            {counterSearchMode === "against" || counterSearchMode === "both"
+                              ? highlightText(counter.against)
+                              : counter.against}
+                          </span>
+                        </td>
+                        <td>{isMobile 
+                          ? formatLaneName(counter.againstLane).split(' ')[0] 
+                          : formatLaneName(counter.againstLane)}
+                        </td>
+                        <td className="text-right">{counter.games}</td>
+                        <td className="text-right">{counter.winRate}%</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            )}
           </div>
 
           <h3 className="section-title" style={{ marginTop: "20px" }}>
             Perfect Counters (100% Win Rate)
           </h3>
           <div style={{ overflowY: "auto", maxHeight: "300px" }}>
-            <table className="data-table-sm">
-              <thead>
-                <tr>
-                  <th>Pick This</th>
-                  <th>Pick Lane</th>
-                  <th>Against</th>
-                  <th>Against Lane</th>
-                  <th className="text-right">Games</th>
-                  <th className="text-right">Win Rate</th>
-                </tr>
-              </thead>
-              <tbody>
-                {getSortedCounters()
-                  .filter(
-                    (counter) =>
-                      parseFloat(counter.winRate) === 100 && counter.games >= 3
-                  )
-                  .map((counter, index) => (
-                    <tr key={index}>
-                      <td>
-                        <span className="hero-name-link" onClick={() => handleHeroClick(counter.pick)}>
-                          {counterSearchMode === "pick" || counterSearchMode === "both"
-                            ? highlightText(counter.pick)
-                            : counter.pick}
-                        </span>
+            {renderTableContainer(
+              <table className="data-table-sm">
+                <thead>
+                  <tr>
+                    <th>Pick This</th>
+                    <th>Pick Lane</th>
+                    <th>Against</th>
+                    <th>Against Lane</th>
+                    <th className="text-right">Games</th>
+                    <th className="text-right">Win Rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {getSortedCounters()
+                    .filter(
+                      (counter) =>
+                        parseFloat(counter.winRate) === 100 && counter.games >= 3
+                    )
+                    .map((counter, index) => (
+                      <tr key={index}>
+                        <td>
+                          <span className="hero-name-link" onClick={() => handleHeroClick(counter.pick)}>
+                            {counterSearchMode === "pick" || counterSearchMode === "both"
+                              ? highlightText(counter.pick)
+                              : counter.pick}
+                          </span>
+                        </td>
+                        <td>{isMobile 
+                          ? formatLaneName(counter.pickLane).split(' ')[0] 
+                          : formatLaneName(counter.pickLane)}
+                        </td>
+                        <td>
+                          <span className="hero-name-link" onClick={() => handleHeroClick(counter.against)}>
+                            {counterSearchMode === "against" || counterSearchMode === "both"
+                              ? highlightText(counter.against)
+                              : counter.against}
+                          </span>
+                        </td>
+                        <td>{isMobile 
+                          ? formatLaneName(counter.againstLane).split(' ')[0] 
+                          : formatLaneName(counter.againstLane)}
+                        </td>
+                        <td className="text-right">{counter.games}</td>
+                        <td className="text-right">{counter.winRate}%</td>
+                      </tr>
+                    ))}
+                  {getSortedCounters().filter(
+                    (counter) => parseFloat(counter.winRate) === 100 && counter.games >= 3
+                  ).length === 0 && (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '20px 0' }}>
+                        No perfect counters found
                       </td>
-                      <td>{formatLaneName(counter.pickLane)}</td>
-                      <td>
-                        <span className="hero-name-link" onClick={() => handleHeroClick(counter.against)}>
-                          {counterSearchMode === "against" || counterSearchMode === "both"
-                            ? highlightText(counter.against)
-                            : counter.against}
-                        </span>
-                      </td>
-                      <td>{formatLaneName(counter.againstLane)}</td>
-                      <td className="text-right">{counter.games}</td>
-                      <td className="text-right">{counter.winRate}%</td>
                     </tr>
-                  ))}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       )}
@@ -1704,13 +1756,12 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                   angle={-45}
                   textAnchor="end"
                   height={70}
+                  tick={isMobile ? { fontSize: 10 } : {}}
                 />
                 <YAxis
-                  label={{
-                    value: "Ban Rate (%)",
-                    angle: -90,
-                    position: "insideLeft",
-                  }}
+                  label={isMobile 
+                    ? null
+                    : { value: "Ban Rate (%)", angle: -90, position: "insideLeft" }}
                 />
                 <Tooltip formatter={(value) => [`${value}%`, "Ban Rate"]} />
                 <Bar dataKey="banRate" fill="#ff8042" name="Ban Rate" />
@@ -1720,7 +1771,7 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
 
           <h3 className="section-title">Ban Priority by Win Rate</h3>
           <p>Characters with high win rates that are worth banning</p>
-          <div style={{ overflowX: "auto" }}>
+          {renderTableContainer(
             <table className="data-table">
               <thead>
                 <tr>
@@ -1773,7 +1824,7 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                   ))}
               </tbody>
             </table>
-          </div>
+          )}
         </div>
       )}
 
@@ -1787,6 +1838,7 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
           synergies={synergies}
           counters={counters}
           data={data}
+          isMobile={isMobile}
         />
       )}
     </div>
