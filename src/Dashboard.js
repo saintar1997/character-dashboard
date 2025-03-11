@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import Papa from "papaparse";
 import "./Dashboard.css";
+import HeroDetail from "./HeroDetail";
 
 const Dashboard = () => {
   // Keep all the existing state variables
@@ -23,6 +24,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStats, setFilteredStats] = useState({});
+
+  // Add state for hero details modal
+  const [selectedHero, setSelectedHero] = useState(null);
 
   // Add a new state for counter search mode
   const [counterSearchMode, setCounterSearchMode] = useState("pick"); // 'pick', 'against', or 'both'
@@ -100,6 +104,16 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
 
     setFilteredStats(filtered);
   }, [searchQuery, characterStats]);
+
+  // Handler for clicking on a hero name
+  const handleHeroClick = (heroName) => {
+    setSelectedHero(heroName);
+  };
+
+  // Handler for closing the hero detail modal
+  const handleHeroDetailClose = () => {
+    setSelectedHero(null);
+  };
 
   // Function to split a comma-separated string into an array
   const splitCharacters = (str) => {
@@ -578,12 +592,19 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
           );
           break;
         case "both":
-          // Filter to show results where either lane matches
-          filteredCounters = filteredCounters.filter(
-            (counter) =>
-              counter.pickLane === selectedLaneFilter ||
-              counter.againstLane === selectedLaneFilter
-          );
+            // Filter to show results where either lane matches
+            filteredCounters = filteredCounters.filter(
+              (counter) =>
+                counter.pickLane === selectedLaneFilter &&
+                counter.againstLane === selectedLaneFilter
+            );
+        case "either":
+            // Filter to show results where either lane matches
+            filteredCounters = filteredCounters.filter(
+              (counter) =>
+                counter.pickLane === selectedLaneFilter &&
+                counter.againstLane === selectedLaneFilter
+            );
           break;
         default:
         // No lane filtering if mode is 'none'
@@ -750,6 +771,18 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
       return sortConfig.direction === "asc" ? "sort-asc" : "sort-desc";
     }
     return "";
+  };
+
+  // Create clickable hero name
+  const renderHeroName = (heroName) => {
+    return (
+      <span 
+        className="hero-name-link" 
+        onClick={() => handleHeroClick(heroName)}
+      >
+        {highlightText(heroName)}
+      </span>
+    );
   };
 
   if (loading) {
@@ -992,7 +1025,7 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
               <tbody>
                 {getSortedCharacterStats().map((char) => (
                   <tr key={char.character}>
-                    <td>{highlightText(char.character)}</td>
+                    <td>{renderHeroName(char.character)}</td>
                     <td className="text-right">{char.pickCount}</td>
                     <td className="text-right">{char.winCount}</td>
                     <td className="text-right">{char.winRate}%</td>
@@ -1135,7 +1168,7 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
               <tbody>
                 {getSortedLaneCharacters(selectedLane).map((char) => (
                   <tr key={char.character}>
-                    <td>{highlightText(char.character)}</td>
+                    <td>{renderHeroName(char.character)}</td>
                     <td className="text-right">{char.pickCount}</td>
                     <td className="text-right">{char.winCount}</td>
                     <td className="text-right">{char.winRate}%</td>
@@ -1289,16 +1322,29 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
               <tbody>
                 {getSortedSynergies()
                   .filter((pair) => pair.games >= 3)
-                  .map((pair, index) => (
-                    <tr key={index}>
-                      <td>{highlightText(pair.pair)}</td>
-                      <td>{formatLaneName(pair.lane1)}</td>
-                      <td>{formatLaneName(pair.lane2)}</td>
-                      <td className="text-right">{pair.games}</td>
-                      <td className="text-right">{pair.wins}</td>
-                      <td className="text-right">{pair.winRate}%</td>
-                    </tr>
-                  ))}
+                  .map((pair, index) => {
+                    const char1 = pair.char1;
+                    const char2 = pair.char2;
+                    
+                    return (
+                      <tr key={index}>
+                        <td>
+                          <span className="hero-name-link" onClick={() => handleHeroClick(char1)}>
+                            {highlightText(char1)}
+                          </span>
+                          {" + "}
+                          <span className="hero-name-link" onClick={() => handleHeroClick(char2)}>
+                            {highlightText(char2)}
+                          </span>
+                        </td>
+                        <td>{formatLaneName(pair.lane1)}</td>
+                        <td>{formatLaneName(pair.lane2)}</td>
+                        <td className="text-right">{pair.games}</td>
+                        <td className="text-right">{pair.wins}</td>
+                        <td className="text-right">{pair.winRate}%</td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
@@ -1376,8 +1422,16 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
 
                         return (
                           <tr key={index}>
-                            <td>{supportChar}</td>
-                            <td>{farmChar}</td>
+                            <td>
+                              <span className="hero-name-link" onClick={() => handleHeroClick(supportChar)}>
+                                {supportChar}
+                              </span>
+                            </td>
+                            <td>
+                              <span className="hero-name-link" onClick={() => handleHeroClick(farmChar)}>
+                                {farmChar}
+                              </span>
+                            </td>
                             <td className="text-right">{pair.games}</td>
                             <td className="text-right">{pair.winRate}%</td>
                           </tr>
@@ -1417,8 +1471,16 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
 
                         return (
                           <tr key={index}>
-                            <td>{midChar}</td>
-                            <td>{darkChar}</td>
+                            <td>
+                              <span className="hero-name-link" onClick={() => handleHeroClick(midChar)}>
+                                {midChar}
+                              </span>
+                            </td>
+                            <td>
+                              <span className="hero-name-link" onClick={() => handleHeroClick(darkChar)}>
+                                {darkChar}
+                              </span>
+                            </td>
                             <td className="text-right">{pair.games}</td>
                             <td className="text-right">{pair.winRate}%</td>
                           </tr>
@@ -1432,7 +1494,7 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
         </div>
       )}
 
-      {/* Counter Picks Tab - Updated with Lane Information */}
+      {/* Counter Picks Tab - Updated with clickable hero names */}
       {activeTab === "counters" && (
         <div className="content-card">
           <h2 className="section-title">
@@ -1470,7 +1532,8 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                 <option value="none">No Lane Filter</option>
                 <option value="pickLane">Filter by Pick Lane</option>
                 <option value="againstLane">Filter by Against Lane</option>
-                <option value="both">Filter by Either Lane</option>
+                <option value="both">Filter by Both Lane</option>
+                <option value="either">Filter by Either Lane</option>
               </select>
             </div>
 
@@ -1553,17 +1616,19 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                   .map((counter, index) => (
                     <tr key={index}>
                       <td>
-                        {counterSearchMode === "pick" ||
-                        counterSearchMode === "both"
-                          ? highlightText(counter.pick)
-                          : counter.pick}
+                        <span className="hero-name-link" onClick={() => handleHeroClick(counter.pick)}>
+                          {counterSearchMode === "pick" || counterSearchMode === "both"
+                            ? highlightText(counter.pick)
+                            : counter.pick}
+                        </span>
                       </td>
                       <td>{formatLaneName(counter.pickLane)}</td>
                       <td>
-                        {counterSearchMode === "against" ||
-                        counterSearchMode === "both"
-                          ? highlightText(counter.against)
-                          : counter.against}
+                        <span className="hero-name-link" onClick={() => handleHeroClick(counter.against)}>
+                          {counterSearchMode === "against" || counterSearchMode === "both"
+                            ? highlightText(counter.against)
+                            : counter.against}
+                        </span>
                       </td>
                       <td>{formatLaneName(counter.againstLane)}</td>
                       <td className="text-right">{counter.games}</td>
@@ -1598,17 +1663,19 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                   .map((counter, index) => (
                     <tr key={index}>
                       <td>
-                        {counterSearchMode === "pick" ||
-                        counterSearchMode === "both"
-                          ? highlightText(counter.pick)
-                          : counter.pick}
+                        <span className="hero-name-link" onClick={() => handleHeroClick(counter.pick)}>
+                          {counterSearchMode === "pick" || counterSearchMode === "both"
+                            ? highlightText(counter.pick)
+                            : counter.pick}
+                        </span>
                       </td>
                       <td>{formatLaneName(counter.pickLane)}</td>
                       <td>
-                        {counterSearchMode === "against" ||
-                        counterSearchMode === "both"
-                          ? highlightText(counter.against)
-                          : counter.against}
+                        <span className="hero-name-link" onClick={() => handleHeroClick(counter.against)}>
+                          {counterSearchMode === "against" || counterSearchMode === "both"
+                            ? highlightText(counter.against)
+                            : counter.against}
+                        </span>
                       </td>
                       <td>{formatLaneName(counter.againstLane)}</td>
                       <td className="text-right">{counter.games}</td>
@@ -1694,7 +1761,11 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                   .filter((char) => char.pickCount >= 5)
                   .map((char, index) => (
                     <tr key={index}>
-                      <td>{highlightText(char.character)}</td>
+                      <td>
+                        <span className="hero-name-link" onClick={() => handleHeroClick(char.character)}>
+                          {highlightText(char.character)}
+                        </span>
+                      </td>
                       <td className="text-right">{char.pickCount}</td>
                       <td className="text-right">{char.winRate}%</td>
                       <td className="text-right">{char.banRate}%</td>
@@ -1704,6 +1775,19 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
             </table>
           </div>
         </div>
+      )}
+
+      {/* Hero Details Modal */}
+      {selectedHero && (
+        <HeroDetail
+          hero={selectedHero}
+          onClose={handleHeroDetailClose}
+          characterStats={characterStats}
+          laneStats={laneStats}
+          synergies={synergies}
+          counters={counters}
+          data={data}
+        />
       )}
     </div>
   );
