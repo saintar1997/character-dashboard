@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   BarChart,
   Bar,
@@ -20,10 +20,62 @@ const HeroDetail = ({
   characterStats,
   laneStats,
   synergies,
+  tripleSynergies,
+  quadSynergies,
   counters,
   data,
-  isMobile = false, // Default to false if not provided
+  isMobile = false,
 }) => {
+  // State for synergy tab selection
+  const [activeSynergyTab, setActiveSynergyTab] = useState("pairs");
+  
+  // Add sort configuration states for each table
+  const [pairSynergySort, setPairSynergySort] = useState({ key: "winRate", direction: "desc" });
+  const [tripleSynergySort, setTripleSynergySort] = useState({ key: "winRate", direction: "desc" });
+  const [quadSynergySort, setQuadSynergySort] = useState({ key: "winRate", direction: "desc" });
+  const [goodAgainstSort, setGoodAgainstSort] = useState({ key: "winRate", direction: "desc" });
+  const [badAgainstSort, setBadAgainstSort] = useState({ key: "winRate", direction: "desc" });
+  const [laneSort, setLaneSort] = useState({ key: "winRate", direction: "desc" });
+
+  // Process triple synergies for this hero
+  const heroTripleSynergies = useMemo(() => {
+    if (!tripleSynergies || !hero) return [];
+    
+    return tripleSynergies
+      .filter(trio => 
+        trio.char1 === hero || trio.char2 === hero || trio.char3 === hero
+      )
+      .map(trio => {
+        // Get the other heroes in the synergy
+        const otherHeroes = [trio.char1, trio.char2, trio.char3].filter(char => char !== hero);
+        
+        return {
+          ...trio,
+          otherHeroes
+        };
+      });
+  }, [tripleSynergies, hero]);
+
+  // Process quad synergies for this hero
+  const heroQuadSynergies = useMemo(() => {
+    if (!quadSynergies || !hero) return [];
+    
+    return quadSynergies
+      .filter(quad => 
+        quad.char1 === hero || quad.char2 === hero || quad.char3 === hero || quad.char4 === hero
+      )
+      .map(quad => {
+        // Get the other heroes in the synergy
+        const otherHeroes = [quad.char1, quad.char2, quad.char3, quad.char4].filter(char => char !== hero);
+        
+        return {
+          ...quad,
+          otherHeroes
+        };
+      });
+  }, [quadSynergies, hero]);
+
+  // NOW we can do the conditional return
   if (!hero) return null;
 
   // Process counters data to ensure pick and against fields are available
@@ -86,13 +138,11 @@ const HeroDetail = ({
 
   // Get counter data - heroes this hero is good against
   const goodAgainst = processedCounters
-    .filter(counter => counter.pick === hero && parseFloat(counter.winRate) > 50)
-    .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate));
+    .filter(counter => counter.pick === hero && parseFloat(counter.winRate) > 50);
 
   // Get counter data - heroes this hero struggles against
   const badAgainst = processedCounters
-    .filter(counter => counter.against === hero && parseFloat(counter.winRate) > 50)
-    .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate));
+    .filter(counter => counter.against === hero && parseFloat(counter.winRate) > 50);
 
   // Prepare data for win rate by lane chart
   const laneWinRateData = lanes.map(lane => ({
@@ -136,6 +186,76 @@ const HeroDetail = ({
     }
   }
 
+  // Request a sort function
+  const requestSort = (key, sortConfigSetter, sortConfig) => {
+    if (!key) return;
+    
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    
+    sortConfigSetter({ key, direction });
+  };
+
+  // Helper function to get value for sorting
+  const getValueForSort = (value) => {
+    if (value === undefined || value === null) return 0;
+
+    if (typeof value === "string" && value.includes("%")) {
+      return parseFloat(value.replace("%", ""));
+    }
+
+    if (typeof value === "string" && !isNaN(value)) {
+      return parseFloat(value);
+    }
+
+    return value;
+  };
+
+  // Get sort class for a column header
+  const getSortClass = (key, sortConfig) => {
+    if (!key) return "";
+    
+    if (sortConfig.key === key) {
+      return sortConfig.direction === "asc" ? "sort-asc" : "sort-desc";
+    }
+    return "";
+  };
+
+  // Function to sort data based on sort configuration
+  const sortData = (data, sortConfig) => {
+    if (!data || !sortConfig || !sortConfig.key) return data;
+    
+    return [...data].sort((a, b) => {
+      // Skip if key doesn't exist in objects
+      if (!(sortConfig.key in a) || !(sortConfig.key in b)) return 0;
+      
+      const aValue = getValueForSort(a[sortConfig.key]);
+      const bValue = getValueForSort(b[sortConfig.key]);
+
+      if (aValue < bValue) {
+        return sortConfig.direction === "asc" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortConfig.direction === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+  };
+
+  // Add this function to render hero name links for multiple heroes
+  const renderMultiHeroNames = (heroes, separator = ", ") => {
+    return heroes.map((heroName, index, array) => (
+      <React.Fragment key={index}>
+        <span className="hero-name-link">
+          {heroName}
+        </span>
+        {index < array.length - 1 && separator}
+      </React.Fragment>
+    ));
+  };
+
   // Table container style for horizontal scrolling on mobile
   const tableContainerStyle = {
     overflowX: 'auto',
@@ -146,6 +266,27 @@ const HeroDetail = ({
 
   // Chart height adjustment for mobile
   const chartHeight = isMobile ? 200 : 300;
+
+  // Convert lane data to array for sorting
+  const laneDataArray = lanes.map(lane => ({
+    lane,
+    laneName: formatLaneName(lane),
+    pickCount: heroLaneData[lane].pickCount,
+    winCount: heroLaneData[lane].winCount,
+    winRate: heroLaneData[lane].winRate
+  }));
+
+  // Sort lane data
+  const sortedLaneData = sortData(laneDataArray, laneSort);
+
+  // Sort synergies data
+  const sortedHeroSynergies = sortData(heroSynergies, pairSynergySort);
+  const sortedTripleSynergies = sortData(heroTripleSynergies, tripleSynergySort);
+  const sortedQuadSynergies = sortData(heroQuadSynergies, quadSynergySort);
+  
+  // Sort counter data
+  const sortedGoodAgainst = sortData(goodAgainst, goodAgainstSort);
+  const sortedBadAgainst = sortData(badAgainst, badAgainstSort);
 
   return (
     <div className="hero-detail-modal">
@@ -223,22 +364,46 @@ const HeroDetail = ({
                 <table className="data-table-sm">
                   <thead>
                     <tr>
-                      <th>Lane</th>
-                      <th className="text-right">Pick Count</th>
-                      <th className="text-right">Win Count</th>
-                      <th className="text-right">Win Rate</th>
+                      <th
+                        className={`sortable ${getSortClass("laneName", laneSort)}`}
+                        onClick={() => requestSort("laneName", setLaneSort, laneSort)}
+                      >
+                        Lane
+                        <span className="sort-indicator"></span>
+                      </th>
+                      <th
+                        className={`sortable ${getSortClass("pickCount", laneSort)} text-right`}
+                        onClick={() => requestSort("pickCount", setLaneSort, laneSort)}
+                      >
+                        Pick Count
+                        <span className="sort-indicator"></span>
+                      </th>
+                      <th
+                        className={`sortable ${getSortClass("winCount", laneSort)} text-right`}
+                        onClick={() => requestSort("winCount", setLaneSort, laneSort)}
+                      >
+                        Win Count
+                        <span className="sort-indicator"></span>
+                      </th>
+                      <th
+                        className={`sortable ${getSortClass("winRate", laneSort)} text-right`}
+                        onClick={() => requestSort("winRate", setLaneSort, laneSort)}
+                      >
+                        Win Rate
+                        <span className="sort-indicator"></span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {lanes.map(lane => (
-                      <tr key={lane}>
+                    {sortedLaneData.map(laneData => (
+                      <tr key={laneData.lane}>
                         <td>{isMobile 
-                          ? formatLaneName(lane).split(' ')[0]
-                          : formatLaneName(lane)}
+                          ? laneData.laneName.split(' ')[0]
+                          : laneData.laneName}
                         </td>
-                        <td className="text-right">{heroLaneData[lane].pickCount}</td>
-                        <td className="text-right">{heroLaneData[lane].winCount}</td>
-                        <td className="text-right">{heroLaneData[lane].winRate}%</td>
+                        <td className="text-right">{laneData.pickCount}</td>
+                        <td className="text-right">{laneData.winCount}</td>
+                        <td className="text-right">{laneData.winRate}%</td>
                       </tr>
                     ))}
                   </tbody>
@@ -270,25 +435,87 @@ const HeroDetail = ({
             </div>
           </div>
 
-          {/* Synergies */}
+          {/* Synergies Tabs */}
           <div className="content-card" style={{ marginTop: '20px' }}>
-            <h3 className="section-title">Best Synergies with {hero}</h3>
-            <div style={tableContainerStyle}>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Partner Hero</th>
-                    <th>Partner Lane</th>
-                    {!isMobile && <th>{hero}'s Lane</th>}
-                    <th className="text-right">Games</th>
-                    {!isMobile && <th className="text-right">Wins</th>}
-                    <th className="text-right">Win Rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {heroSynergies
-                    .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate))
-                    .map((synergy, index) => (
+            <h3 className="section-title">Synergies with {hero}</h3>
+            
+            <div className="synergy-type-tabs">
+              <div
+                className={`synergy-type-tab ${activeSynergyTab === "pairs" ? "synergy-type-tab-active" : ""}`}
+                onClick={() => setActiveSynergyTab("pairs")}
+              >
+                2-Hero
+              </div>
+              <div
+                className={`synergy-type-tab ${activeSynergyTab === "triples" ? "synergy-type-tab-active" : ""}`}
+                onClick={() => setActiveSynergyTab("triples")}
+              >
+                3-Hero
+              </div>
+              <div
+                className={`synergy-type-tab ${activeSynergyTab === "quads" ? "synergy-type-tab-active" : ""}`}
+                onClick={() => setActiveSynergyTab("quads")}
+              >
+                4-Hero
+              </div>
+            </div>
+            
+            {/* Pair Synergies Table */}
+            {activeSynergyTab === "pairs" && (
+              <div style={tableContainerStyle}>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th
+                        className={`sortable ${getSortClass("otherHero", pairSynergySort)}`}
+                        onClick={() => requestSort("otherHero", setPairSynergySort, pairSynergySort)}
+                      >
+                        Partner Hero
+                        <span className="sort-indicator"></span>
+                      </th>
+                      <th
+                        className={`sortable ${getSortClass("otherHeroLane", pairSynergySort)}`}
+                        onClick={() => requestSort("otherHeroLane", setPairSynergySort, pairSynergySort)}
+                      >
+                        Partner Lane
+                        <span className="sort-indicator"></span>
+                      </th>
+                      {!isMobile && (
+                        <th
+                          className={`sortable ${getSortClass("heroLane", pairSynergySort)}`}
+                          onClick={() => requestSort("heroLane", setPairSynergySort, pairSynergySort)}
+                        >
+                          {hero}'s Lane
+                          <span className="sort-indicator"></span>
+                        </th>
+                      )}
+                      <th
+                        className={`sortable ${getSortClass("games", pairSynergySort)} text-right`}
+                        onClick={() => requestSort("games", setPairSynergySort, pairSynergySort)}
+                      >
+                        Games
+                        <span className="sort-indicator"></span>
+                      </th>
+                      {!isMobile && (
+                        <th
+                          className={`sortable ${getSortClass("wins", pairSynergySort)} text-right`}
+                          onClick={() => requestSort("wins", setPairSynergySort, pairSynergySort)}
+                        >
+                          Wins
+                          <span className="sort-indicator"></span>
+                        </th>
+                      )}
+                      <th
+                        className={`sortable ${getSortClass("winRate", pairSynergySort)} text-right`}
+                        onClick={() => requestSort("winRate", setPairSynergySort, pairSynergySort)}
+                      >
+                        Win Rate
+                        <span className="sort-indicator"></span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedHeroSynergies.map((synergy, index) => (
                       <tr key={index}>
                         <td>{synergy.otherHero}</td>
                         <td>{isMobile 
@@ -301,16 +528,135 @@ const HeroDetail = ({
                         <td className="text-right">{synergy.winRate}%</td>
                       </tr>
                     ))}
-                  {heroSynergies.length === 0 && (
+                    {sortedHeroSynergies.length === 0 && (
+                      <tr>
+                        <td colSpan={isMobile ? 4 : 6} style={{ textAlign: 'center', padding: '20px 0' }}>
+                          No 2-hero synergy data available
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
+            {/* Triple Synergies Table */}
+            {activeSynergyTab === "triples" && (
+              <div style={tableContainerStyle}>
+                <table className="data-table">
+                  <thead>
                     <tr>
-                      <td colSpan={isMobile ? 4 : 6} style={{ textAlign: 'center', padding: '20px 0' }}>
-                        No synergy data available
-                      </td>
+                      <th
+                        className={`sortable ${getSortClass("otherHeroes", tripleSynergySort)}`}
+                        onClick={() => requestSort("otherHeroes", setTripleSynergySort, tripleSynergySort)}
+                      >
+                        Other Heroes
+                        <span className="sort-indicator"></span>
+                      </th>
+                      <th
+                        className={`sortable ${getSortClass("games", tripleSynergySort)} text-right`}
+                        onClick={() => requestSort("games", setTripleSynergySort, tripleSynergySort)}
+                      >
+                        Games
+                        <span className="sort-indicator"></span>
+                      </th>
+                      {!isMobile && (
+                        <th
+                          className={`sortable ${getSortClass("wins", tripleSynergySort)} text-right`}
+                          onClick={() => requestSort("wins", setTripleSynergySort, tripleSynergySort)}
+                        >
+                          Wins
+                          <span className="sort-indicator"></span>
+                        </th>
+                      )}
+                      <th
+                        className={`sortable ${getSortClass("winRate", tripleSynergySort)} text-right`}
+                        onClick={() => requestSort("winRate", setTripleSynergySort, tripleSynergySort)}
+                      >
+                        Win Rate
+                        <span className="sort-indicator"></span>
+                      </th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {sortedTripleSynergies.map((synergy, index) => (
+                      <tr key={index}>
+                        <td>{renderMultiHeroNames(synergy.otherHeroes)}</td>
+                        <td className="text-right">{synergy.games}</td>
+                        {!isMobile && <td className="text-right">{synergy.wins}</td>}
+                        <td className="text-right">{synergy.winRate}%</td>
+                      </tr>
+                    ))}
+                    {sortedTripleSynergies.length === 0 && (
+                      <tr>
+                        <td colSpan={isMobile ? 3 : 4} style={{ textAlign: 'center', padding: '20px 0' }}>
+                          No 3-hero synergy data available
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
+            {/* Quad Synergies Table */}
+            {activeSynergyTab === "quads" && (
+              <div style={tableContainerStyle}>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th
+                        className={`sortable ${getSortClass("otherHeroes", quadSynergySort)}`}
+                        onClick={() => requestSort("otherHeroes", setQuadSynergySort, quadSynergySort)}
+                      >
+                        Other Heroes
+                        <span className="sort-indicator"></span>
+                      </th>
+                      <th
+                        className={`sortable ${getSortClass("games", quadSynergySort)} text-right`}
+                        onClick={() => requestSort("games", setQuadSynergySort, quadSynergySort)}
+                      >
+                        Games
+                        <span className="sort-indicator"></span>
+                      </th>
+                      {!isMobile && (
+                        <th
+                          className={`sortable ${getSortClass("wins", quadSynergySort)} text-right`}
+                          onClick={() => requestSort("wins", setQuadSynergySort, quadSynergySort)}
+                        >
+                          Wins
+                          <span className="sort-indicator"></span>
+                        </th>
+                      )}
+                      <th
+                        className={`sortable ${getSortClass("winRate", quadSynergySort)} text-right`}
+                        onClick={() => requestSort("winRate", setQuadSynergySort, quadSynergySort)}
+                      >
+                        Win Rate
+                        <span className="sort-indicator"></span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedQuadSynergies.map((synergy, index) => (
+                      <tr key={index}>
+                        <td>{renderMultiHeroNames(synergy.otherHeroes)}</td>
+                        <td className="text-right">{synergy.games}</td>
+                        {!isMobile && <td className="text-right">{synergy.wins}</td>}
+                        <td className="text-right">{synergy.winRate}%</td>
+                      </tr>
+                    ))}
+                    {sortedQuadSynergies.length === 0 && (
+                      <tr>
+                        <td colSpan={isMobile ? 3 : 4} style={{ textAlign: 'center', padding: '20px 0' }}>
+                          No 4-hero synergy data available
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           <div className="two-column-layout" style={{ marginTop: '20px' }}>
@@ -321,14 +667,38 @@ const HeroDetail = ({
                 <table className="data-table-sm">
                   <thead>
                     <tr>
-                      <th>Hero</th>
-                      <th>Enemy Lane</th>
-                      <th className="text-right">Games</th>
-                      <th className="text-right">Win Rate</th>
+                      <th
+                        className={`sortable ${getSortClass("against", goodAgainstSort)}`}
+                        onClick={() => requestSort("against", setGoodAgainstSort, goodAgainstSort)}
+                      >
+                        Hero
+                        <span className="sort-indicator"></span>
+                      </th>
+                      <th
+                        className={`sortable ${getSortClass("againstLane", goodAgainstSort)}`}
+                        onClick={() => requestSort("againstLane", setGoodAgainstSort, goodAgainstSort)}
+                      >
+                        Enemy Lane
+                        <span className="sort-indicator"></span>
+                      </th>
+                      <th
+                        className={`sortable ${getSortClass("games", goodAgainstSort)} text-right`}
+                        onClick={() => requestSort("games", setGoodAgainstSort, goodAgainstSort)}
+                      >
+                        Games
+                        <span className="sort-indicator"></span>
+                      </th>
+                      <th
+                        className={`sortable ${getSortClass("winRate", goodAgainstSort)} text-right`}
+                        onClick={() => requestSort("winRate", setGoodAgainstSort, goodAgainstSort)}
+                      >
+                        Win Rate
+                        <span className="sort-indicator"></span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {goodAgainst.slice(0, 10).map((counter, index) => (
+                    {sortedGoodAgainst.slice(0, 10).map((counter, index) => (
                       <tr key={index}>
                         <td>{counter.against}</td>
                         <td>{isMobile 
@@ -339,7 +709,7 @@ const HeroDetail = ({
                         <td className="text-right">{counter.winRate}%</td>
                       </tr>
                     ))}
-                    {goodAgainst.length === 0 && (
+                    {sortedGoodAgainst.length === 0 && (
                       <tr>
                         <td colSpan="4" style={{ textAlign: 'center', padding: '20px 0' }}>
                           No counter data available
@@ -358,14 +728,38 @@ const HeroDetail = ({
                 <table className="data-table-sm">
                   <thead>
                     <tr>
-                      <th>Hero</th>
-                      <th>Enemy Lane</th>
-                      <th className="text-right">Games</th>
-                      <th className="text-right">Win Rate</th>
+                      <th
+                        className={`sortable ${getSortClass("pick", badAgainstSort)}`}
+                        onClick={() => requestSort("pick", setBadAgainstSort, badAgainstSort)}
+                      >
+                        Hero
+                        <span className="sort-indicator"></span>
+                      </th>
+                      <th
+                        className={`sortable ${getSortClass("pickLane", badAgainstSort)}`}
+                        onClick={() => requestSort("pickLane", setBadAgainstSort, badAgainstSort)}
+                      >
+                        Enemy Lane
+                        <span className="sort-indicator"></span>
+                      </th>
+                      <th
+                        className={`sortable ${getSortClass("games", badAgainstSort)} text-right`}
+                        onClick={() => requestSort("games", setBadAgainstSort, badAgainstSort)}
+                      >
+                        Games
+                        <span className="sort-indicator"></span>
+                      </th>
+                      <th
+                        className={`sortable ${getSortClass("winRate", badAgainstSort)} text-right`}
+                        onClick={() => requestSort("winRate", setBadAgainstSort, badAgainstSort)}
+                      >
+                        Win Rate
+                        <span className="sort-indicator"></span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {badAgainst.slice(0, 10).map((counter, index) => (
+                    {sortedBadAgainst.slice(0, 10).map((counter, index) => (
                       <tr key={index}>
                         <td>{counter.pick}</td>
                         <td>{isMobile 
@@ -376,7 +770,7 @@ const HeroDetail = ({
                         <td className="text-right">{counter.winRate}%</td>
                       </tr>
                     ))}
-                    {badAgainst.length === 0 && (
+                    {sortedBadAgainst.length === 0 && (
                       <tr>
                         <td colSpan="4" style={{ textAlign: 'center', padding: '20px 0' }}>
                           No counter data available
