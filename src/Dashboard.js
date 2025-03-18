@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   BarChart,
   Bar,
@@ -24,6 +24,28 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStats, setFilteredStats] = useState({});
+  const [overviewSortConfig, setOverviewSortConfig] = useState({ key: "pickCount", direction: "desc" });
+  const [lanesSortConfig, setLanesSortConfig] = useState({ key: "pickCount", direction: "desc" });
+  const [synergiesSortConfig, setSynergiesSortConfig] = useState({ key: "winRate", direction: "desc" });
+  const [countersSortConfig, setCountersSortConfig] = useState({ key: "winRate", direction: "desc" });
+  const [bansSortConfig, setBansSortConfig] = useState({ key: "banCount", direction: "desc" });
+
+  const getActiveSortConfig = () => {
+    switch (activeTab) {
+      case "overview":
+        return { config: overviewSortConfig, setConfig: setOverviewSortConfig };
+      case "lanes":
+        return { config: lanesSortConfig, setConfig: setLanesSortConfig };
+      case "synergies":
+        return { config: synergiesSortConfig, setConfig: setSynergiesSortConfig };
+      case "counters":
+        return { config: countersSortConfig, setConfig: setCountersSortConfig };
+      case "bans":
+        return { config: bansSortConfig, setConfig: setBansSortConfig };
+      default:
+        return { config: overviewSortConfig, setConfig: setOverviewSortConfig };
+    }
+  };
 
   // Add state for hero details modal
   const [selectedHero, setSelectedHero] = useState(null);
@@ -43,96 +65,12 @@ const Dashboard = () => {
   const [selectedSynergyLaneFilter, setSelectedSynergyLaneFilter] =
     useState("all"); // 'all', 'dark', 'farm', 'mid', 'abyssal', 'support'
 
-  // Sorting state
-  const [sortConfig, setSortConfig] = useState({
-    key: "pickCount",
-    direction: "desc",
-  });
 
-  // Handler for clicking on a hero name
-  const handleHeroClick = (heroName) => {
-    setSelectedHero(heroName);
-  };
-
-  // Handler for closing the hero detail modal
-  const handleHeroDetailClose = () => {
-    setSelectedHero(null);
-  };
-
-  // Listen for window resize to detect mobile view
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    window.addEventListener('resize', handleResize);
-    
-    // Initial check
-    handleResize();
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    // Load the CSV file
-    const fetchData = async () => {
-      try {
-        // As a last resort (not ideal but will work)
-const response = await fetch('https://saintar1997.github.io/character-dashboard/Game_History.csv');
-        const csvText = await response.text();
-
-        const result = Papa.parse(csvText, {
-          header: true,
-          skipEmptyLines: true,
-        });
-
-        setData(result.data);
-
-        // Process all the data
-        const { characterStats, laneStats } = analyzeData(result.data);
-        setCharacterStats(characterStats);
-        setFilteredStats(characterStats); // Initialize filtered stats with all stats
-        setLaneStats(laneStats);
-
-        // Process synergies
-        const synergies = analyzeCharacterSynergies(result.data);
-        setSynergies(synergies);
-
-        // Process counter picks
-        const counters = analyzeCounterPicks(result.data);
-        setCounters(counters);
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Error loading data:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  // Update filtered stats when search query changes
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredStats(characterStats);
-      return;
-    }
-
-    const query = searchQuery.toLowerCase();
-
-    // Filter character stats
-    const filtered = Object.entries(characterStats)
-      .filter(([character]) => character.toLowerCase().includes(query))
-      .reduce((obj, [character, stats]) => {
-        obj[character] = stats;
-        return obj;
-      }, {});
-
-    setFilteredStats(filtered);
-  }, [searchQuery, characterStats]);
+  // eslint-disable-next-line no-unused-vars
+  // const [sortConfig, setSortConfig] = useState({
+  //   key: "pickCount", 
+  //   direction: "desc",
+  // });
 
   // Function to split a comma-separated string into an array
   const splitCharacters = (str) => {
@@ -141,7 +79,7 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
   };
 
   // Analyze the game data
-  const analyzeData = (games) => {
+  const analyzeData = useCallback((games) => {
     const characterStats = {};
     const laneStats = {
       dark: {},
@@ -225,10 +163,10 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
     });
 
     return { characterStats, laneStats };
-  };
+  }, []);
 
   // Analyze character synergies
-  const analyzeCharacterSynergies = (games) => {
+  const analyzeCharacterSynergies = useCallback((games) => {
     const pairStats = {};
     const lanePositions = ["dark", "farm", "mid", "abyssal", "support"];
 
@@ -337,10 +275,10 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
       .sort((a, b) => b.winRate - a.winRate);
 
     return pairRankings;
-  };
+  }, []);
 
   // Analyze counter picks - updated to include lane information
-  const analyzeCounterPicks = (games) => {
+  const analyzeCounterPicks = useCallback((games) => {
     const matchups = {};
     const lanePositions = ["dark", "farm", "mid", "abyssal", "support"];
 
@@ -408,240 +346,462 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
       .sort((a, b) => b.winRate - a.winRate);
 
     return matchupRankings;
+  }, []);
+
+  // Handler for clicking on a hero name
+  const handleHeroClick = (heroName) => {
+    setSelectedHero(heroName);
   };
+
+  // Handler for closing the hero detail modal
+  const handleHeroDetailClose = () => {
+    setSelectedHero(null);
+  };
+
+  // Listen for window resize to detect mobile view
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // Initial check
+    handleResize();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Load the CSV file
+    const fetchData = async () => {
+      try {
+        // As a last resort (not ideal but will work)
+        const response = await fetch(
+          "https://saintar1997.github.io/character-dashboard/Game_History.csv"
+        );
+        const csvText = await response.text();
+
+        const result = Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+        });
+
+        setData(result.data);
+
+        // Process all the data
+        const { characterStats, laneStats } = analyzeData(result.data);
+        setCharacterStats(characterStats);
+        setFilteredStats(characterStats); // Initialize filtered stats with all stats
+        setLaneStats(laneStats);
+
+        // Process synergies
+        const synergies = analyzeCharacterSynergies(result.data);
+        setSynergies(synergies);
+
+        // Process counter picks
+        const counters = analyzeCounterPicks(result.data);
+        setCounters(counters);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error loading data:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [analyzeData, analyzeCharacterSynergies, analyzeCounterPicks]); // เพิ่ม dependencies ตรงนี้
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredStats(characterStats);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+
+    // Filter character stats
+    const filtered = Object.entries(characterStats)
+      .filter(([character]) => character.toLowerCase().includes(query))
+      .reduce((obj, [character, stats]) => {
+        obj[character] = stats;
+        return obj;
+      }, {});
+
+    setFilteredStats(filtered);
+  }, [searchQuery, characterStats]);
+
+  useEffect(() => {
+  //   // กำหนด config เริ่มต้นสำหรับแต่ละแท็บ
+  //   // const defaultConfigs = {
+  //   //   overview: { key: "pickCount", direction: "desc" },
+  //   //   lanes: { key: "pickCount", direction: "desc" },
+  //   //   synergies: { key: "winRate", direction: "desc" },
+  //   //   counters: { key: "winRate", direction: "desc" },
+  //   //   bans: { key: "banCount", direction: "desc" },
+  //   // };
+
+  //   // // อัปเดต sortConfig เมื่อเปลี่ยนแท็บ
+  //   // setSortConfig(
+  //   //   defaultConfigs[activeTab] || { key: "pickCount", direction: "desc" }
+  //   // );
+  }, [activeTab]);
 
   // Request a sort
   const requestSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
+    if (!key) return;
+    
+    try {
+      const { config, setConfig } = getActiveSortConfig();
+      
+      let direction = "asc";
+      if (config.key === key && config.direction === "asc") {
+        direction = "desc";
+      }
+      
+      setConfig({ key, direction });
+    } catch (error) {
+      console.error("Error in requestSort:", error);
     }
-    setSortConfig({ key, direction });
   };
 
-  // Get sorted character stats
+  // ฟังก์ชันช่วยในการแปลงค่าให้เป็นตัวเลขสำหรับการเรียงลำดับ
+  const getValueForSort = (value) => {
+    // ป้องกันกรณี value เป็น undefined หรือ null
+    if (value === undefined || value === null) return 0;
+
+    // ถ้าเป็นค่าเปอร์เซ็นต์ (เช่น "9.00%" หรือ "80.52%")
+    if (typeof value === "string" && value.includes("%")) {
+      return parseFloat(value.replace("%", ""));
+    }
+
+    // ถ้าเป็นค่า string ที่ควรเป็นตัวเลข (แต่ไม่มีเครื่องหมาย %)
+    if (typeof value === "string" && !isNaN(value)) {
+      return parseFloat(value);
+    }
+
+    // กรณีอื่นๆ ให้ใช้ค่าเดิม
+    return value;
+  };
+
+  // แก้ไขฟังก์ชัน getSortedCharacterStats
   const getSortedCharacterStats = () => {
-    const statsArray = Object.entries(filteredStats).map(
-      ([character, stats]) => {
-        const winRate =
-          stats.pickCount > 0
-            ? ((stats.winCount / stats.pickCount) * 100).toFixed(2)
-            : 0;
-        const totalGames = data.length;
-        const banRate = ((stats.banCount / (totalGames * 2)) * 100).toFixed(2);
-
-        return {
-          character,
-          pickCount: stats.pickCount,
-          winCount: stats.winCount,
-          winRate,
-          banCount: stats.banCount,
-          banRate,
-        };
-      }
-    );
-
-    return statsArray.sort((a, b) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
-        return sortConfig.direction === "asc" ? -1 : 1;
-      }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
-        return sortConfig.direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
+    try {
+      const { config } = getActiveSortConfig();
+      
+      // ต่อจากนี้คือโค้ดเดิม แต่ใช้ config แทน sortConfig
+      if (!filteredStats || Object.keys(filteredStats).length === 0) return [];
+      
+      const statsArray = Object.entries(filteredStats).map(
+        ([character, stats]) => {
+          if (!stats) return null;
+          
+          const winRate =
+            stats.pickCount > 0
+              ? ((stats.winCount / stats.pickCount) * 100).toFixed(2)
+              : 0;
+          const totalGames = data?.length || 0;
+          const banRate = ((stats.banCount / (totalGames * 2)) * 100).toFixed(2);
+    
+          return {
+            character,
+            pickCount: stats.pickCount,
+            winCount: stats.winCount,
+            winRate,
+            banCount: stats.banCount,
+            banRate,
+          };
+        }
+      ).filter(Boolean);
+    
+      return statsArray.sort((a, b) => {
+        if (!a || !b || !config || !config.key) return 0;
+        
+        // ตรวจสอบว่า key มีอยู่ใน object หรือไม่
+        if (!(config.key in a) || !(config.key in b)) return 0;
+        
+        const aValue = getValueForSort(a[config.key]);
+        const bValue = getValueForSort(b[config.key]);
+    
+        if (aValue < bValue) {
+          return config.direction === "asc" ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return config.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    } catch (error) {
+      console.error("Error in getSortedCharacterStats:", error);
+      return [];
+    }
   };
-
-  // Get sorted lane characters
+  
+  // แก้ไขฟังก์ชัน getSortedLaneCharacters
   const getSortedLaneCharacters = (lane) => {
-    if (!laneStats[lane]) return [];
+    try {
+      const { config } = getActiveSortConfig();
 
-    // Filter lane characters based on search query
-    const filteredLaneCharacters = Object.entries(laneStats[lane])
-      .filter(([character]) => {
-        if (!searchQuery.trim()) return true;
-        return character.toLowerCase().includes(searchQuery.toLowerCase());
-      })
-      .map(([character, stats]) => {
-        const winRate =
-          stats.pickCount > 0
-            ? ((stats.winCount / stats.pickCount) * 100).toFixed(2)
-            : 0;
-        return {
-          character,
-          pickCount: stats.pickCount,
-          winCount: stats.winCount,
-          winRate,
-        };
-      })
-      .filter((char) => char.pickCount >= 3);
+      const filteredLaneCharacters = Object.entries(laneStats[lane])
+        .filter(([character]) => {
+          if (!searchQuery || !searchQuery.trim()) return true;
+          return character.toLowerCase().includes(searchQuery.toLowerCase());
+        })
+        .map(([character, stats]) => {
+          if (!stats) return null; // ป้องกันกรณี stats เป็น undefined
 
-    return filteredLaneCharacters.sort((a, b) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
-        return sortConfig.direction === "asc" ? -1 : 1;
-      }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
-        return sortConfig.direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
+          const winRate =
+            stats.pickCount > 0
+              ? ((stats.winCount / stats.pickCount) * 100).toFixed(2)
+              : 0;
+          return {
+            character,
+            pickCount: stats.pickCount,
+            winCount: stats.winCount,
+            winRate,
+          };
+        })
+        .filter(Boolean) // กรอง null ออก
+        .filter((char) => char.pickCount >= 3);
+
+      return filteredLaneCharacters.sort((a, b) => {
+        if (!a || !b || !config || !config.key) return 0;
+
+        // ตรวจสอบว่า key มีอยู่ใน object หรือไม่
+        if (!(config.key in a) || !(config.key in b)) return 0;
+
+        const aValue = getValueForSort(a[config.key]);
+        const bValue = getValueForSort(b[config.key]);
+
+        if (aValue < bValue) {
+          return config.direction === "asc" ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return config.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    } catch (error) {
+      console.error("Error in getSortedLaneCharacters:", error);
+      return [];
+    }
   };
 
-  // Get sorted synergies
+  // แก้ไขฟังก์ชัน getSortedSynergies
   const getSortedSynergies = () => {
-    let filteredSynergies = synergies;
-
-    // Apply search query filter if provided
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filteredSynergies = filteredSynergies.filter((synergy) =>
-        synergy.pair.toLowerCase().includes(query)
-      );
+    try {
+      // รับ config จากแท็บปัจจุบัน
+      const { config } = getActiveSortConfig();
+      
+      // ป้องกันกรณี synergies เป็น null หรือ undefined
+      if (!synergies) return [];
+      
+      // กำหนดค่าเริ่มต้นให้ filteredSynergies - นี่คือส่วนที่ขาดหายไป
+      let filteredSynergies = [...synergies];
+      
+      // Apply search query filter if provided
+      if (searchQuery && searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        filteredSynergies = filteredSynergies.filter((synergy) =>
+          synergy.pair.toLowerCase().includes(query)
+        );
+      }
+  
+      // Apply lane filter if selected
+      if (
+        selectedSynergyLaneFilter !== "all" &&
+        synergyLaneFilterMode !== "none"
+      ) {
+        switch (synergyLaneFilterMode) {
+          case "char1Lane":
+            // Filter to only show results where the first character's lane matches
+            filteredSynergies = filteredSynergies.filter(
+              (synergy) => synergy.lane1 === selectedSynergyLaneFilter
+            );
+            break;
+          case "char2Lane":
+            // Filter to only show results where the second character's lane matches
+            filteredSynergies = filteredSynergies.filter(
+              (synergy) => synergy.lane2 === selectedSynergyLaneFilter
+            );
+            break;
+          case "either":
+            // Filter to show results where either lane matches
+            filteredSynergies = filteredSynergies.filter(
+              (synergy) =>
+                synergy.lane1 === selectedSynergyLaneFilter ||
+                synergy.lane2 === selectedSynergyLaneFilter
+            );
+            break;
+          case "both":
+            // Filter to show specific lane combinations
+            filteredSynergies = filteredSynergies.filter((synergy) => {
+              const hasLane1 = synergy.lane1 === selectedSynergyLaneFilter;
+              const hasLane2 = synergy.lane2 === selectedSynergyLaneFilter;
+              return hasLane1 && hasLane2;
+            });
+            break;
+          default:
+          // No lane filtering if mode is 'none'
+        }
+      }
+  
+      // Sort based on the current sort config
+      return filteredSynergies.sort((a, b) => {
+        // ป้องกันกรณี a หรือ b เป็น null หรือไม่มี key ที่ต้องการ
+        if (!a || !b || !config || !config.key) return 0;
+        
+        // ตรวจสอบว่ามี key ใน object หรือไม่
+        if (!(config.key in a) || !(config.key in b)) return 0;
+        
+        const aValue = getValueForSort(a[config.key]);
+        const bValue = getValueForSort(b[config.key]);
+  
+        if (aValue < bValue) {
+          return config.direction === "asc" ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return config.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    } catch (error) {
+      console.error("Error in getSortedSynergies:", error);
+      return []; // ถ้าเกิด error ให้คืนค่า array ว่าง
     }
-
-    // Apply lane filter if selected
-    if (
-      selectedSynergyLaneFilter !== "all" &&
-      synergyLaneFilterMode !== "none"
-    ) {
-      switch (synergyLaneFilterMode) {
-        case "char1Lane":
-          // Filter to only show results where the first character's lane matches
-          filteredSynergies = filteredSynergies.filter(
-            (synergy) => synergy.lane1 === selectedSynergyLaneFilter
-          );
-          break;
-        case "char2Lane":
-          // Filter to only show results where the second character's lane matches
-          filteredSynergies = filteredSynergies.filter(
-            (synergy) => synergy.lane2 === selectedSynergyLaneFilter
-          );
-          break;
-        case "either":
-          // Filter to show results where either lane matches
-          filteredSynergies = filteredSynergies.filter(
-            (synergy) =>
-              synergy.lane1 === selectedSynergyLaneFilter ||
-              synergy.lane2 === selectedSynergyLaneFilter
-          );
-          break;
-        case "both":
-          // Filter to show specific lane combinations
-          filteredSynergies = filteredSynergies.filter((synergy) => {
-            const hasLane1 = synergy.lane1 === selectedSynergyLaneFilter;
-            const hasLane2 = synergy.lane2 === selectedSynergyLaneFilter;
-            return hasLane1 && hasLane2;
-          });
-          break;
-        default:
-        // No lane filtering if mode is 'none'
-      }
-    }
-
-    // Sort based on the current sort config
-    return filteredSynergies.sort((a, b) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
-        return sortConfig.direction === "asc" ? -1 : 1;
-      }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
-        return sortConfig.direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
   };
 
-  // Get sorted counters - updated for lane filtering
+  // แก้ไขฟังก์ชัน getSortedCounters
   const getSortedCounters = () => {
-    // First convert the counter data to have pick and against properties
-    const processedCounters = counters.map((counter) => {
-      const [pick, against] = counter.matchup.split(" vs ");
-      return {
-        ...counter,
-        pick,
-        against,
-      };
-    });
+    try {
+      const { config } = getActiveSortConfig();
 
-    // Then filter based on search query and mode
-    let filteredCounters = processedCounters;
+      const processedCounters = counters
+        .map((counter) => {
+          if (!counter || !counter.matchup) return null;
 
-    // Apply search query filter if provided
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+          const parts = counter.matchup.split(" vs ");
+          const pick = parts[0] || "";
+          const against = parts[1] || "";
 
-      switch (counterSearchMode) {
-        case "pick":
-          // Filter to only show results where "Pick This" matches search
-          filteredCounters = filteredCounters.filter((counter) =>
-            counter.pick.toLowerCase().includes(query)
-          );
-          break;
-        case "against":
-          // Filter to only show results where "Against" matches search
-          filteredCounters = filteredCounters.filter((counter) =>
-            counter.against.toLowerCase().includes(query)
-          );
-          break;
-        case "both":
-          // Filter to show results where either column matches (original behavior)
-          filteredCounters = filteredCounters.filter(
-            (counter) =>
-              counter.pick.toLowerCase().includes(query) ||
+          return {
+            ...counter,
+            pick,
+            against,
+          };
+        })
+        .filter(Boolean); // กรอง null ออก
+
+      let filteredCounters = processedCounters;
+
+      // Apply search query filter if provided
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+
+        switch (counterSearchMode) {
+          case "pick":
+            // Filter to only show results where "Pick This" matches search
+            filteredCounters = filteredCounters.filter((counter) =>
+              counter.pick.toLowerCase().includes(query)
+            );
+            break;
+          case "against":
+            // Filter to only show results where "Against" matches search
+            filteredCounters = filteredCounters.filter((counter) =>
               counter.against.toLowerCase().includes(query)
-          );
-          break;
-        default:
-        // No filtering
+            );
+            break;
+          case "both":
+            // Filter to show results where either column matches (original behavior)
+            filteredCounters = filteredCounters.filter(
+              (counter) =>
+                counter.pick.toLowerCase().includes(query) ||
+                counter.against.toLowerCase().includes(query)
+            );
+            break;
+          default:
+          // No filtering
+        }
       }
-    }
 
-    // Apply lane filter if selected
-    if (selectedLaneFilter !== "all" && laneFilterMode !== "none") {
-      switch (laneFilterMode) {
-        case "pickLane":
-          // Filter to only show results where the pick lane matches
-          filteredCounters = filteredCounters.filter(
-            (counter) => counter.pickLane === selectedLaneFilter
-          );
-          break;
-        case "againstLane":
-          // Filter to only show results where the against lane matches
-          filteredCounters = filteredCounters.filter(
-            (counter) => counter.againstLane === selectedLaneFilter
-          );
-          break;
-        case "both":
-            // Filter to show results where either lane matches
+      // Apply lane filter if selected
+      if (selectedLaneFilter !== "all" && laneFilterMode !== "none") {
+        switch (laneFilterMode) {
+          case "pickLane":
+            // Filter to only show results where the pick lane matches
+            filteredCounters = filteredCounters.filter(
+              (counter) => counter.pickLane === selectedLaneFilter
+            );
+            break;
+          case "againstLane":
+            // Filter to only show results where the against lane matches
+            filteredCounters = filteredCounters.filter(
+              (counter) => counter.againstLane === selectedLaneFilter
+            );
+            break;
+          case "both":
+            // Filter to show results where both lanes match
             filteredCounters = filteredCounters.filter(
               (counter) =>
                 counter.pickLane === selectedLaneFilter &&
                 counter.againstLane === selectedLaneFilter
             );
-        case "either":
+            break;
+          case "either":
             // Filter to show results where either lane matches
             filteredCounters = filteredCounters.filter(
               (counter) =>
-                counter.pickLane === selectedLaneFilter &&
+                counter.pickLane === selectedLaneFilter ||
                 counter.againstLane === selectedLaneFilter
             );
-          break;
-        default:
-        // No lane filtering if mode is 'none'
+            break;
+          default:
+          // No lane filtering if mode is 'none'
+        }
       }
+
+      // Sort based on the current sort config
+      return filteredCounters.sort((a, b) => {
+        if (!a || !b || !config || !config.key) return 0;
+
+        // ตรวจสอบว่า key มีอยู่ใน object หรือไม่
+        if (!(config.key in a) || !(config.key in b)) return 0;
+
+        const aValue = getValueForSort(a[config.key]);
+        const bValue = getValueForSort(b[config.key]);
+
+        if (aValue < bValue) {
+          return config.direction === "asc" ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return config.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    } catch (error) {
+      console.error("Error in getSortedCounters:", error);
+      return [];
     }
+  };
 
-    // Sort based on the current sort config
-    return filteredCounters.sort((a, b) => {
-      const key = sortConfig.key;
-
-      if (a[key] < b[key]) {
-        return sortConfig.direction === "asc" ? -1 : 1;
+  // Get sort class for a column header
+  const getSortClass = (key) => {
+    try {
+      if (!key) return "";
+      
+      const { config } = getActiveSortConfig();
+      
+      if (config.key === key) {
+        return config.direction === "asc" ? "sort-asc" : "sort-desc";
       }
-      if (a[key] > b[key]) {
-        return sortConfig.direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
+      return "";
+    } catch (error) {
+      console.error("Error in getSortClass:", error);
+      return "";
+    }
   };
 
   // Style adjustments for responsive design
@@ -670,11 +830,7 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
 
   // Function to create table containers with horizontal scrolling for mobile
   const renderTableContainer = (tableContent) => {
-    return (
-      <div className="data-table-container">
-        {tableContent}
-      </div>
-    );
+    return <div className="data-table-container">{tableContent}</div>;
   };
 
   // Get top characters by pick rate for chart
@@ -687,22 +843,6 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
         pickCount: stats.pickCount,
       }))
       .sort((a, b) => b.pickCount - a.pickCount)
-      .slice(0, limit);
-  };
-
-  // Get top characters by win rate for chart
-  const getTopByWinRate = (minGames = 5, limit = 10) => {
-    return Object.entries(filteredStats)
-      .map(([character, stats]) => ({
-        name: character,
-        winRate:
-          stats.pickCount > 0
-            ? ((stats.winCount / stats.pickCount) * 100).toFixed(2)
-            : 0,
-        games: stats.pickCount,
-      }))
-      .filter((char) => char.games >= minGames)
-      .sort((a, b) => b.winRate - a.winRate)
       .slice(0, limit);
   };
 
@@ -799,19 +939,11 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
     );
   };
 
-  // Get sort class for a column header
-  const getSortClass = (key) => {
-    if (sortConfig.key === key) {
-      return sortConfig.direction === "asc" ? "sort-asc" : "sort-desc";
-    }
-    return "";
-  };
-
   // Create clickable hero name
   const renderHeroName = (heroName) => {
     return (
-      <span 
-        className="hero-name-link" 
+      <span
+        className="hero-name-link"
         onClick={() => handleHeroClick(heroName)}
       >
         {highlightText(heroName)}
@@ -821,29 +953,29 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
 
   // Filter controls style for responsive design
   const filterControlsStyle = {
-    marginBottom: '15px',
-    display: 'flex',
-    flexDirection: isMobile ? 'column' : 'row',
-    flexWrap: isMobile ? 'nowrap' : 'wrap',
-    alignItems: isMobile ? 'flex-start' : 'center',
-    width: '100%',
+    marginBottom: "15px",
+    display: "flex",
+    flexDirection: isMobile ? "column" : "row",
+    flexWrap: isMobile ? "nowrap" : "wrap",
+    alignItems: isMobile ? "flex-start" : "center",
+    width: "100%",
   };
 
   const filterGroupStyle = {
-    marginRight: isMobile ? '0' : '20px',
-    marginBottom: isMobile ? '10px' : '0',
-    display: 'flex',
-    flexDirection: isMobile ? 'column' : 'row',
-    alignItems: isMobile ? 'flex-start' : 'center',
-    width: isMobile ? '100%' : 'auto',
+    marginRight: isMobile ? "0" : "20px",
+    marginBottom: isMobile ? "10px" : "0",
+    display: "flex",
+    flexDirection: isMobile ? "column" : "row",
+    alignItems: isMobile ? "flex-start" : "center",
+    width: isMobile ? "100%" : "auto",
   };
 
   const selectStyle = {
-    padding: '6px 12px',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-    width: isMobile ? '100%' : 'auto',
-    marginTop: isMobile ? '5px' : '0',
+    padding: "6px 12px",
+    borderRadius: "4px",
+    border: "1px solid #ccc",
+    width: isMobile ? "100%" : "auto",
+    marginTop: isMobile ? "5px" : "0",
   };
 
   if (loading) {
@@ -1024,9 +1156,15 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                   tick={isMobile ? { fontSize: 10 } : {}}
                 />
                 <YAxis
-                  label={isMobile 
-                    ? null
-                    : { value: "Pick Rate (%)", angle: -90, position: "insideLeft" }}
+                  label={
+                    isMobile
+                      ? null
+                      : {
+                          value: "Pick Rate (%)",
+                          angle: -90,
+                          position: "insideLeft",
+                        }
+                  }
                 />
                 <Tooltip formatter={(value) => [`${value}%`, "Pick Rate"]} />
                 <Bar dataKey="pickRate" fill="#8884d8" name="Pick Rate" />
@@ -1171,9 +1309,15 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                   tick={isMobile ? { fontSize: 10 } : {}}
                 />
                 <YAxis
-                  label={isMobile 
-                    ? null
-                    : { value: "Win Rate (%)", angle: -90, position: "insideLeft" }}
+                  label={
+                    isMobile
+                      ? null
+                      : {
+                          value: "Win Rate (%)",
+                          angle: -90,
+                          position: "insideLeft",
+                        }
+                  }
                 />
                 <Tooltip
                   formatter={(value, name, props) => [
@@ -1249,7 +1393,13 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
           {/* Lane Filter Controls for Synergies - updated for responsive design */}
           <div style={filterControlsStyle} className="filter-controls">
             <div style={filterGroupStyle} className="filter-control-group">
-              <label style={{ marginRight: isMobile ? '0' : '10px', marginBottom: isMobile ? '5px' : '0', fontWeight: "bold" }}>
+              <label
+                style={{
+                  marginRight: isMobile ? "0" : "10px",
+                  marginBottom: isMobile ? "5px" : "0",
+                  fontWeight: "bold",
+                }}
+              >
                 Lane Filter:
               </label>
               <select
@@ -1258,15 +1408,25 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                 style={selectStyle}
               >
                 <option value="none">All Lane</option>
-                <option value="char1Lane">Filter by First Character Lane</option>
-                <option value="char2Lane">Filter by Second Character Lane</option>
+                <option value="char1Lane">
+                  Filter by First Character Lane
+                </option>
+                <option value="char2Lane">
+                  Filter by Second Character Lane
+                </option>
                 <option value="either">Filter by Either Lane</option>
               </select>
             </div>
 
             {synergyLaneFilterMode !== "none" && (
               <div style={filterGroupStyle} className="filter-control-group">
-                <label style={{ marginRight: isMobile ? '0' : '10px', marginBottom: isMobile ? '5px' : '0', fontWeight: "bold" }}>
+                <label
+                  style={{
+                    marginRight: isMobile ? "0" : "10px",
+                    marginBottom: isMobile ? "5px" : "0",
+                    fontWeight: "bold",
+                  }}
+                >
                   Select Lane:
                 </label>
                 <select
@@ -1349,7 +1509,9 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                       <span className="sort-indicator"></span>
                     </th>
                     <th
-                      className={`sortable ${getSortClass("winRate")} text-right`}
+                      className={`sortable ${getSortClass(
+                        "winRate"
+                      )} text-right`}
                       onClick={() => requestSort("winRate")}
                     >
                       Win Rate
@@ -1363,25 +1525,33 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                     .map((pair, index) => {
                       const char1 = pair.char1;
                       const char2 = pair.char2;
-                      
+
                       return (
                         <tr key={index}>
                           <td>
-                            <span className="hero-name-link" onClick={() => handleHeroClick(char1)}>
+                            <span
+                              className="hero-name-link"
+                              onClick={() => handleHeroClick(char1)}
+                            >
                               {highlightText(char1)}
                             </span>
                             {" + "}
-                            <span className="hero-name-link" onClick={() => handleHeroClick(char2)}>
+                            <span
+                              className="hero-name-link"
+                              onClick={() => handleHeroClick(char2)}
+                            >
                               {highlightText(char2)}
                             </span>
                           </td>
-                          <td>{isMobile 
-                            ? formatLaneName(pair.lane1).split(' ')[0] 
-                            : formatLaneName(pair.lane1)}
+                          <td>
+                            {isMobile
+                              ? formatLaneName(pair.lane1).split(" ")[0]
+                              : formatLaneName(pair.lane1)}
                           </td>
-                          <td>{isMobile 
-                            ? formatLaneName(pair.lane2).split(' ')[0] 
-                            : formatLaneName(pair.lane2)}
+                          <td>
+                            {isMobile
+                              ? formatLaneName(pair.lane2).split(" ")[0]
+                              : formatLaneName(pair.lane2)}
                           </td>
                           <td className="text-right">{pair.games}</td>
                           <td className="text-right">{pair.wins}</td>
@@ -1417,9 +1587,15 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                   tick={isMobile ? { fontSize: 10 } : {}}
                 />
                 <YAxis
-                  label={isMobile 
-                    ? null
-                    : { value: "Win Rate (%)", angle: -90, position: "insideLeft" }}
+                  label={
+                    isMobile
+                      ? null
+                      : {
+                          value: "Win Rate (%)",
+                          angle: -90,
+                          position: "insideLeft",
+                        }
+                  }
                 />
                 <Tooltip
                   formatter={(value, name, props) => [
@@ -1453,7 +1629,8 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                       {getSortedSynergies()
                         .filter(
                           (pair) =>
-                            (pair.lane1 === "support" && pair.lane2 === "farm") ||
+                            (pair.lane1 === "support" &&
+                              pair.lane2 === "farm") ||
                             (pair.lane1 === "farm" && pair.lane2 === "support")
                         )
                         .filter((pair) => pair.games >= 3)
@@ -1468,12 +1645,18 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                           return (
                             <tr key={index}>
                               <td>
-                                <span className="hero-name-link" onClick={() => handleHeroClick(supportChar)}>
+                                <span
+                                  className="hero-name-link"
+                                  onClick={() => handleHeroClick(supportChar)}
+                                >
                                   {supportChar}
                                 </span>
                               </td>
                               <td>
-                                <span className="hero-name-link" onClick={() => handleHeroClick(farmChar)}>
+                                <span
+                                  className="hero-name-link"
+                                  onClick={() => handleHeroClick(farmChar)}
+                                >
                                   {farmChar}
                                 </span>
                               </td>
@@ -1519,12 +1702,18 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                           return (
                             <tr key={index}>
                               <td>
-                                <span className="hero-name-link" onClick={() => handleHeroClick(midChar)}>
+                                <span
+                                  className="hero-name-link"
+                                  onClick={() => handleHeroClick(midChar)}
+                                >
                                   {midChar}
                                 </span>
                               </td>
                               <td>
-                                <span className="hero-name-link" onClick={() => handleHeroClick(darkChar)}>
+                                <span
+                                  className="hero-name-link"
+                                  onClick={() => handleHeroClick(darkChar)}
+                                >
                                   {darkChar}
                                 </span>
                               </td>
@@ -1552,7 +1741,13 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
           {/* Lane Filter Controls - updated for responsive design */}
           <div style={filterControlsStyle} className="filter-controls">
             <div style={filterGroupStyle} className="filter-control-group">
-              <label style={{ marginRight: isMobile ? '0' : '10px', marginBottom: isMobile ? '5px' : '0', fontWeight: "bold" }}>
+              <label
+                style={{
+                  marginRight: isMobile ? "0" : "10px",
+                  marginBottom: isMobile ? "5px" : "0",
+                  fontWeight: "bold",
+                }}
+              >
                 Lane Filter:
               </label>
               <select
@@ -1570,7 +1765,13 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
 
             {laneFilterMode !== "none" && (
               <div style={filterGroupStyle} className="filter-control-group">
-                <label style={{ marginRight: isMobile ? '0' : '10px', marginBottom: isMobile ? '5px' : '0', fontWeight: "bold" }}>
+                <label
+                  style={{
+                    marginRight: isMobile ? "0" : "10px",
+                    marginBottom: isMobile ? "5px" : "0",
+                    fontWeight: "bold",
+                  }}
+                >
                   Select Lane:
                 </label>
                 <select
@@ -1630,7 +1831,9 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                       <span className="sort-indicator"></span>
                     </th>
                     <th
-                      className={`sortable ${getSortClass("winRate")} text-right`}
+                      className={`sortable ${getSortClass(
+                        "winRate"
+                      )} text-right`}
                       onClick={() => requestSort("winRate")}
                     >
                       Win Rate
@@ -1644,26 +1847,36 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                     .map((counter, index) => (
                       <tr key={index}>
                         <td>
-                          <span className="hero-name-link" onClick={() => handleHeroClick(counter.pick)}>
-                            {counterSearchMode === "pick" || counterSearchMode === "both"
+                          <span
+                            className="hero-name-link"
+                            onClick={() => handleHeroClick(counter.pick)}
+                          >
+                            {counterSearchMode === "pick" ||
+                            counterSearchMode === "both"
                               ? highlightText(counter.pick)
                               : counter.pick}
                           </span>
                         </td>
-                        <td>{isMobile 
-                          ? formatLaneName(counter.pickLane).split(' ')[0] 
-                          : formatLaneName(counter.pickLane)}
+                        <td>
+                          {isMobile
+                            ? formatLaneName(counter.pickLane).split(" ")[0]
+                            : formatLaneName(counter.pickLane)}
                         </td>
                         <td>
-                          <span className="hero-name-link" onClick={() => handleHeroClick(counter.against)}>
-                            {counterSearchMode === "against" || counterSearchMode === "both"
+                          <span
+                            className="hero-name-link"
+                            onClick={() => handleHeroClick(counter.against)}
+                          >
+                            {counterSearchMode === "against" ||
+                            counterSearchMode === "both"
                               ? highlightText(counter.against)
                               : counter.against}
                           </span>
                         </td>
-                        <td>{isMobile 
-                          ? formatLaneName(counter.againstLane).split(' ')[0] 
-                          : formatLaneName(counter.againstLane)}
+                        <td>
+                          {isMobile
+                            ? formatLaneName(counter.againstLane).split(" ")[0]
+                            : formatLaneName(counter.againstLane)}
                         </td>
                         <td className="text-right">{counter.games}</td>
                         <td className="text-right">{counter.winRate}%</td>
@@ -1694,41 +1907,56 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                   {getSortedCounters()
                     .filter(
                       (counter) =>
-                        parseFloat(counter.winRate) === 100 && counter.games >= 3
+                        parseFloat(counter.winRate) === 100 &&
+                        counter.games >= 3
                     )
                     .map((counter, index) => (
                       <tr key={index}>
                         <td>
-                          <span className="hero-name-link" onClick={() => handleHeroClick(counter.pick)}>
-                            {counterSearchMode === "pick" || counterSearchMode === "both"
+                          <span
+                            className="hero-name-link"
+                            onClick={() => handleHeroClick(counter.pick)}
+                          >
+                            {counterSearchMode === "pick" ||
+                            counterSearchMode === "both"
                               ? highlightText(counter.pick)
                               : counter.pick}
                           </span>
                         </td>
-                        <td>{isMobile 
-                          ? formatLaneName(counter.pickLane).split(' ')[0] 
-                          : formatLaneName(counter.pickLane)}
+                        <td>
+                          {isMobile
+                            ? formatLaneName(counter.pickLane).split(" ")[0]
+                            : formatLaneName(counter.pickLane)}
                         </td>
                         <td>
-                          <span className="hero-name-link" onClick={() => handleHeroClick(counter.against)}>
-                            {counterSearchMode === "against" || counterSearchMode === "both"
+                          <span
+                            className="hero-name-link"
+                            onClick={() => handleHeroClick(counter.against)}
+                          >
+                            {counterSearchMode === "against" ||
+                            counterSearchMode === "both"
                               ? highlightText(counter.against)
                               : counter.against}
                           </span>
                         </td>
-                        <td>{isMobile 
-                          ? formatLaneName(counter.againstLane).split(' ')[0] 
-                          : formatLaneName(counter.againstLane)}
+                        <td>
+                          {isMobile
+                            ? formatLaneName(counter.againstLane).split(" ")[0]
+                            : formatLaneName(counter.againstLane)}
                         </td>
                         <td className="text-right">{counter.games}</td>
                         <td className="text-right">{counter.winRate}%</td>
                       </tr>
                     ))}
                   {getSortedCounters().filter(
-                    (counter) => parseFloat(counter.winRate) === 100 && counter.games >= 3
+                    (counter) =>
+                      parseFloat(counter.winRate) === 100 && counter.games >= 3
                   ).length === 0 && (
                     <tr>
-                      <td colSpan="6" style={{ textAlign: 'center', padding: '20px 0' }}>
+                      <td
+                        colSpan="6"
+                        style={{ textAlign: "center", padding: "20px 0" }}
+                      >
                         No perfect counters found
                       </td>
                     </tr>
@@ -1759,9 +1987,15 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                   tick={isMobile ? { fontSize: 10 } : {}}
                 />
                 <YAxis
-                  label={isMobile 
-                    ? null
-                    : { value: "Ban Rate (%)", angle: -90, position: "insideLeft" }}
+                  label={
+                    isMobile
+                      ? null
+                      : {
+                          value: "Ban Rate (%)",
+                          angle: -90,
+                          position: "insideLeft",
+                        }
+                  }
                 />
                 <Tooltip formatter={(value) => [`${value}%`, "Ban Rate"]} />
                 <Bar dataKey="banRate" fill="#ff8042" name="Ban Rate" />
@@ -1813,7 +2047,10 @@ const response = await fetch('https://saintar1997.github.io/character-dashboard/
                   .map((char, index) => (
                     <tr key={index}>
                       <td>
-                        <span className="hero-name-link" onClick={() => handleHeroClick(char.character)}>
+                        <span
+                          className="hero-name-link"
+                          onClick={() => handleHeroClick(char.character)}
+                        >
                           {highlightText(char.character)}
                         </span>
                       </td>
