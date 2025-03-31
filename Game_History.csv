@@ -1,14 +1,78 @@
 ﻿date,tournament,team1,team2,picks1,picks2,bans1,bans2,winner
+2025-03-30,AOG Spring 2025 GS1,BSS,SPN,"Yena,Bolt Baron,Ignis,Hayate,Grakk","Qi,Eland'orr,Rouie,Stuart,TeeMee","Valhein,Raz,Florentino,Riktor","Billow,Maloch,Ryoma,Mina",SPN
+2025-03-30,AOG Spring 2025 GS1,BSS,SPN,"Florentino,Zuka,Liliana,Valhein,Zip","Murad,Aoi,Maloch,Capheny,Dolia","Raz,Stuart,Fennik,Marja","Billow,Enzo,Eland'orr,Krixi",SPN
+2025-03-30,AOG Spring 2025 GS1,BSS,SPN,"Marja,Nakroth,Raz,Capheny,TeeMee","Omen,Zephys,Natalya,Hayate,Enzo","Maloch,Stuart,Mina,Qi","Billow,Valhein,Florentino,Eland'orr",SPN
+2025-03-30,GCS 2025 Spring GS,DCG,HKA,"Bolt Baron,Murad,Iggy,Capheny,Ming","Omen,Errol,Alice,Eland'orr,Toro","Rouie,Valhein,Dolia,Maloch","Stuart,Billow,Mina,Roxie",HKA
+2025-03-30,GCS 2025 Spring GS,DCG,HKA,"Qi,Zuka,Rouie,Fennik,Enzo","Marja,Nakroth,Liliana,Hayate,TeeMee","Bolt Baron,Keera,Raz,Florentino","Eland'orr,Billow,Omen,Capheny",DCG
+2025-03-30,GCS 2025 Spring GS,DCG,HKA,"Biron,Yan,Raz,Valhein,Maloch","Qi,Aoi,Mganga,Capheny,Thane","TeeMee,Keera,Omen,Florentino","Rouie,Bolt Baron,Baldum,Roxie",HKA
+2025-03-30,GCS 2025 Spring GS,DCG,HKA,"Yena,Keera,Liliana,Hayate,TeeMee","Billow,Fennik,Iggy,Elsu,Enzo","Bolt Baron,Marja,Valhein,Raz","Eland'orr,Stuart,Omen,Qi",DCG
+2025-03-29,AOG Spring 2025 GS1,BOX,1S,"Ryoma,Bolt Baron,Liliana,Capheny,Zip","Qi,Eland'orr,Raz,Violet,Enzo","Stuart,Maloch,Murad,Tel'Annas","Valhein,TeeMee,Mina,Omen",1S
+2025-03-29,AOG Spring 2025 GS1,BOX,1S,"Florentino,Errol,Ignis,Fennik,Krizzix","Yena,Billow,Rouie,Slimz,Arduin","Valhein,Bolt Baron,Hayate,Baldum","Maloch,Eland'orr,TeeMee,Yan",1S
+2025-03-29,AOG Spring 2025 GS1,BOX,1S,"Murad,Billow,Raz,Stuart,Xeniel","Skud,Yan,Yue,Capheny,TeeMee","Bolt Baron,Valhein,Marja,Tulen","Enzo,Eland'orr,Baldum,Florentino",1S
+2025-03-29,GCS 2025 Spring GS,BMG,FW,"Marja,Kriknak,Iggy,Capheny,Krizzix","Biron,Eland'orr,Liliana,Hayate,TeeMee","Bolt Baron,Raz,Rouie,Murad","Billow,Enzo,Omen,Florentino",BMG
+2025-03-29,GCS 2025 Spring GS,BMG,FW,"Riktor,Ryoma,Rouie,Valhein,TeeMee","Yena,Marja,Natalya,Capheny,Y'bneth","Bolt Baron,Raz,Aoi,Keera","Billow,Eland'orr,Qi,Florentino",FW
+2025-03-29,GCS 2025 Spring GS,BMG,FW,"Bolt Baron,Aoi,Liliana,Fennik,Omega","Qi,Nakroth,Ignis,Valhein,Enzo","Raz,Marja,Keera,Eland'orr","Billow,TeeMee,Omen,Florentino",BMG
+2025-03-29,GCS 2025 Spring GS,BMG,FW,"Murad,Keera,Raz,Stuart,Maloch","Billow,Zuka,Iggy,Violet,Toro","Bolt Baron,TeeMee,Hayate,Elsu","Rouie,Marja,Valhein,Omen",BMG
+2025-03-29,AOG Spring 2025 GS1,FL,TDT,"Roxie,Errol,Liliana,Capheny,Baldum","Omen,Billow,Mganga,Tel'Annas,Xeniel","Valhein,Maloch,Zip,Mina","TeeMee,Eland'orr,Qi,Murad",FL
+2025-03-29,AOG Spring 2025 GS1,FL,TDT,"Ryoma,Aoi,Alice,Bolt Baron,Dolia","Zuka,Rourke,Iggy,Fennik,Thane","Maloch,Eland'orr,Elsu,Omen","Valhein,Billow,Qi,Capheny",TDT
+2025-03-29,AOG Spring 2025 GS1,FL,TDT,"Riktor,Fennik,Rouie,Marja,Mina","Ryoma,Wonder Woman,Raz,Stuart,Enzo","Maloch,Eland'orr,Florentino,Ming","Valhein,Billow,Omen,Skud",FL
+2025-03-29,AOG Spring 2025 GS1,FL,TDT,"Florentino,Keera,Ignis,Hayate,Y'bneth","Yena,Bolt Baron,Rouie,Violet,Wiro Sableng","Valhein,Billow,Capheny,Eland'orr","Maloch,TeeMee,Roxie,Qi",FL
+2025-03-29,AOG Spring 2025 GS1,FL,TDT,"Yena,Sinestrea,Raz,Stuart,Enzo","Qi,Keera,Liliana,Hayate,TeeMee","Maloch,Eland'orr,Skud,Marja","Valhein,Billow,Bolt Baron,Aoi",TDT
+2025-03-29,AOG Spring 2025 GS1,BSS,FPL,"Maloch,Aoi,Liliana,Slimz,Grakk","Marja,Zuka,Alice,Murad,Dolia","Billow,Enzo,Capheny,Florentino","Valhein,Stuart,Omen,Qi",BSS
+2025-03-29,AOG Spring 2025 GS1,BSS,FPL,"Skud,Keera,Rouie,Hayate,Arduin","Yena,Eland'orr,Natalya,Violet,Krizzix","Billow,Raz,Enzo,Grakk","Valhein,Maloch,Mina,TeeMee",BSS
+2025-03-29,AOG Spring 2025 GS1,BSS,FPL,"Riktor,Billow,Raz,Tel'Annas,Enzo","Skud,Fennik,Tulen,Hayate,TeeMee","Maloch,Stuart,Murad,Marja","Valhein,Bolt Baron,Capheny,Elsu",BSS
+2025-03-29,GCS 2025 Spring GS,ANK,ONE,"Skud,Aoi,Maloch,Stuart,Dolia","Riktor,Eland'orr,Natalya,Capheny,Enzo","Marja,TeeMee,Florentino,Qi","Rouie,Valhein,Billow,Omen",ONE
+2025-03-29,GCS 2025 Spring GS,ANK,ONE,"Marja,Zuka,Liliana,Capheny,Enzo","Billow,Keera,Raz,Hayate,Arduin","TeeMee,Maloch,Qi,Murad","Rouie,Valhein,Stuart,Eland'orr",ONE
+2025-03-29,GCS 2025 Spring GS,ANK,ONE,"Biron,Fennik,Raz,Hayate,TeeMee","Bolt Baron,Nakroth,Tulen,Stuart,Toro","Rouie,Marja,Eland'orr,Iggy","Billow,Valhein,Omen,Qi",ONE
+2025-03-28,AOG Spring 2025 GS1,FL,BOX,"Qi,Bolt Baron,Liliana,Murad,Zip","Airi,Marja,Maloch,Capheny,Ming","Billow,Enzo,Rouie,Alice","Valhein,TeeMee,Stuart,Tel'Annas",FL
+2025-03-28,AOG Spring 2025 GS1,FL,BOX,"Riktor,Aoi,Alice,Hayate,Raz","Florentino,Yan,Tulen,Stuart,Dolia","Billow,Maloch,Zuka,Omen","Valhein,Bolt Baron,Murad,Fennik",FL
+2025-03-28,AOG Spring 2025 GS1,FL,BOX,"Skud,Marja,Rouie,Capheny,Arduin","Yena,Fennik,Ignis,Mina,TeeMee","Bolt Baron,Billow,Stuart,Eland'orr","Valhein,Maloch,Omen,Florentino",FL
+2025-03-28,AOG Spring 2025 GS1,FL,BOX,"Roxie,Billow,Ignis,Elsu,Enzo","Qi,Errol,Raz,Valhein,Zip","Bolt Baron,Marja,Eland'orr,Wonder Woman","Maloch,Stuart,Diao Chan,Florentino",BOX
+2025-03-28,AOG Spring 2025 GS1,TDT,SGP,"Florentino,Zuka,Illumia,Fennik,Thane","Riktor,Aoi,Krixi,Violet,Ming","Valhein,Enzo,Airi,Qi","Billow,Hayate,Rouie,Yue",SGP
+2025-03-28,AOG Spring 2025 GS1,TDT,SGP,"Yena,Keera,Natalya,Stuart,Dolia","Skud,Bolt Baron,Liliana,Hayate,Maloch","Valhein,Enzo,Alice,Omen","Billow,Rouie,Sephera,Kahlii",SGP
+2025-03-28,AOG Spring 2025 GS1,TDT,SGP,"Skud,Eland'orr,Liliana,Capheny,TeeMee","Ryoma,Marja,Raz,Stuart,Arduin","Valhein,Enzo,Dolia,Ming","Rouie,Billow,Hayate,Omen",TDT
+2025-03-28,AOG Spring 2025 GS1,TDT,SGP,"Qi,Marja,Iggy,Valhein,Grakk","Florentino,Billow,Ignis,Fennik,Y'bneth","Maloch,Raz,Omen,Xeniel","Rouie,TeeMee,Zip,Enzo",SGP
+2025-03-28,AOG Spring 2025 GS1,TDT,SGP,"Mina,Bolt Baron,Raz,Violet,Ming","Yena,Wonder Woman,Rouie,Capheny,TeeMee","Valhein,Billow,Florentino,Marja","Stuart,Eland'orr,Enzo,Hayate",TDT
+2025-03-28,AOG Spring 2025 GS1,SPN,1S,"Kaine,Marja,Tulen,Capheny,Omega","Qi,Eland'orr,Raz,Tel'Annas,Baldum","Rouie,Valhein,Stuart,Zip","Billow,TeeMee,Hayate,Roxie",SPN
+2025-03-28,AOG Spring 2025 GS1,SPN,1S,"Mina,Ryoma,Liliana,Wisp,Krizzix","Riktor,Murad,Violet,Marja,Ming","Valhein,Rouie,Raz,Aoi","Billow,TeeMee,Keera,Hayate",SPN
+2025-03-28,AOG Spring 2025 GS1,SPN,1S,"Omen,Enzo,Rouie,Stuart,Toro","Yena,Keera,Diao Chan,Slimz,TeeMee","Raz,Valhein,Skud,Florentino","Bolt Baron,Marja,Arduin,Murad",1S
+2025-03-28,AOG Spring 2025 GS1,SPN,1S,"Qi,Eland'orr,Raz,Valhein,Zip","Maloch,Billow,Tulen,Fennik,Mina","Stuart,Rouie,Dolia,Alice","Bolt Baron,Enzo,Murad,Florentino",1S
+2025-03-28,AOG Spring 2025 GS1,SPN,1S,"Airi,Aoi,Maloch,Lindis,Dolia","Bolt Baron,Yan,Natalya,Hayate,Grakk","Rouie,Raz,Enzo,Roxie","Billow,Eland'orr,Omen,Florentino",SPN
+2025-03-27,AOG Spring 2025 GS1,BSS,TDT,"Florentino,Marja,Raz,Fennik,Grakk","Qi,Keera,Rouie,Hayate,Wiro Sableng","TeeMee,Billow,Arduin,Omega","Valhein,Maloch,Enzo,Krizzix",TDT
+2025-03-27,AOG Spring 2025 GS1,BSS,TDT,"Bolt Baron,Ryoma,Krixi,Hayate,TeeMee","Riktor,Eland'orr,Raz,Stuart,Dolia","Maloch,Marja,Enzo,Ming","Valhein,Billow,Liliana,Mina",TDT
+2025-03-27,AOG Spring 2025 GS1,BSS,TDT,"Yena,Wonder Woman,Rouie,Stuart,Arduin","Skud,Bolt Baron,Natalya,Valhein,Aleister","Billow,TeeMee,Qi,Florentino","Maloch,Raz,Aoi,Keera",TDT
+2025-03-27,AOG Spring 2025 GS1,BOX,FPL,"Florentino,Keera,Iggy,Stuart,Dolia","Airi,Zuka,Liliana,Hayate,TeeMee","Maloch,Rouie,Murad,Billow","Valhein,Raz,Ming,Enzo",FPL
+2025-03-27,AOG Spring 2025 GS1,BOX,FPL,"Bolt Baron,Aoi,Liliana,Fennik,TeeMee","Marja,Wonder Woman,Diao Chan,Stuart,Enzo","Valhein,Raz,Hayate,Qi","Maloch,Rouie,Yue,Murad",FPL
+2025-03-27,AOG Spring 2025 GS1,BOX,FPL,"Biron,Billow,Rouie,Capheny,Omega","Yena,Bolt Baron,Raz,Fennik,Krizzix","Valhein,TeeMee,Mina,Stuart","Maloch,Enzo,Marja,Qi",FPL
+2025-03-23,AOG Spring 2025 GS1,SGP,1S,"Skud,Yan,Rouie,Fennik,Arduin","Florentino,Aoi,Natalya,Valhein,Omega","Billow,Marja,Roxie,Ming","Eland'orr,Bolt Baron,Zuka,Omen",1S
+2025-03-23,AOG Spring 2025 GS1,SGP,1S,"Riktor,Billow,Tulen,Violet,Xeniel","Yena,Keera,Raz,Slimz,TeeMee","Stuart,Marja,Omen,Roxie","Valhein,Enzo,Zip,Skud",1S
+2025-03-23,AOG Spring 2025 GS1,SGP,1S,"Marja,Wonder Woman,Liliana,Stuart,Ming","Qi,Bolt Baron,Diao Chan,Hayate,Enzo","Valhein,Rouie,Murad,Natalya","TeeMee,Maloch,Arduin,Omen",1S
 2025-03-23,RPL 2025 Summer - GS,TLN,PSG,"Florentino,Zuka,Illumia,Tel'Annas,Grakk","Murad,Bolt Baron,Aleister,Eland'orr,Dolia","Rouie,Maloch,Zata,Hayate","Valhein,Marja,Krixi,Liliana",PSG
 2025-03-23,RPL 2025 Summer - GS,TLN,PSG,"Yena,Bolt Baron,Natalya,Fennik,Baldum","Skud,Aoi,Liliana,Valhein,Roxie","Rouie,Enzo,Murad,Qi","Marja,Maloch,Florentino,Grakk",PSG
 2025-03-23,RPL 2025 Summer - GS,TLN,PSG,"Omen,Eland'orr,Tulen,Elsu,TeeMee","Ryoma,Billow,Iggy,Stuart,Y'bneth","Valhein,Bolt Baron,Rouie,Dolia","Marja,Maloch,Raz,Murad",TLN
 2025-03-23,RPL 2025 Summer - GS,TLN,PSG,"Skud,Keera,Rouie,Stuart,Arduin","Xeniel,Zuka,Ignis,Capheny,Ming","Maloch,Billow,Florentino,TeeMee","Valhein,Bolt Baron,Mina,Omen",TLN
 2025-03-23,RPL 2025 Summer - GS,TLN,PSG,"Qi,Billow,Ignis,Capheny,Enzo","Yena,Marja,Raz,Fennik,Mina","Maloch,Rouie,Arduin,Stuart","Valhein,Bolt Baron,Florentino,Iggy",PSG
+2025-03-23,GCS 2025 Spring GS,DCG,BMG,"Biron,Keera,Iggy,Valhein,Baldum","Bolt Baron,Murad,Liliana,Fennik,Thane","Rouie,Eland'orr,Enzo,Skud","Marja,Maloch,Florentino,Omen",BMG
+2025-03-23,GCS 2025 Spring GS,DCG,BMG,"Yena,Errol,Rouie,Capheny,Thane","Riktor,Billow,Raz,Stuart,Roxie","Valhein,Bolt Baron,Florentino,Enzo","Marja,Keera,Omen,Murad",BMG
+2025-03-23,GCS 2025 Spring GS,DCG,BMG,"Qi,Nakroth,Raz,Stuart,Enzo","Biron,Keera,Tulen,Hayate,Arduin","Valhein,Bolt Baron,Skud,Riktor","Marja,Rouie,Omen,Florentino",DCG
+2025-03-23,GCS 2025 Spring GS,DCG,BMG,"Airi,Billow,Alice,Fennik,Dolia","Qi,Aoi,Mganga,Elsu,Toro","Bolt Baron,Valhein,Stuart,Capheny","Marja,Rouie,Florentino,Omen",DCG
+2025-03-23,GCS 2025 Spring GS,DCG,BMG,"Riktor,Eland'orr,Liliana,Hayate,TeeMee","Marja,Ryoma,Iggy,Violet,Toro","Bolt Baron,Valhein,Elsu,Stuart","Maloch,Rouie,Omen,Qi",BMG
+2025-03-23,AOG Spring 2025 GS1,SPN,FL,"Ryoma,Aoi,Iggy,Capheny,Helen","Yena,Marja,Rouie,Murad,Krizzix","Valhein,Maloch,Omen,Arduin","Billow,Florentino,Ming,Zip",FL
+2025-03-23,AOG Spring 2025 GS1,SPN,FL,"Yena,Enzo,Raz,Hayate,Krizzix","Mina,Keera,Tulen,Capheny,Lumburr","Maloch,TeeMee,Zip,Ming","Valhein,Billow,Marja,Florentino",FL
+2025-03-23,AOG Spring 2025 GS1,SPN,FL,"Qi,Bolt Baron,Maloch,Fennik,Dolia","Florentino,Aoi,Natalya,Stuart,Enzo","Valhein,Marja,Raz,Keera","Hayate,Eland'orr,Murad,Tulen",SPN
+2025-03-23,AOG Spring 2025 GS1,SPN,FL,"Airi,Keera,Veera,Stuart,TeeMee","Bolt Baron,Billow,Liliana,Hayate,Xeniel","Valhein,Marja,Omen,Yena","Maloch,Eland'orr,Florentino,Raz",FL
 2025-03-23,RPL 2025 Summer - GS,BRU,BAC,"Skud,Yan,Rouie,Fennik,Y'bneth","Zanis,Keera,Natalya,Capheny,Roxie","Eland'orr,Maloch,Grakk,Ming","Valhein,Raz,Tel'Annas,Yena",BRU
 2025-03-23,RPL 2025 Summer - GS,BRU,BAC,"Marja,Keera,Sephera,Violet,Dolia","Yena,Zuka,Ignis,Bolt Baron,Xeniel","Valhein,Rouie,Y'bneth,Eland'orr","Maloch,Raz,Ming,Zip",BAC
 2025-03-23,RPL 2025 Summer - GS,BRU,BAC,"Qi,Eland'orr,Liliana,Capheny,Arduin","Ryoma,Marja,Iggy,Celica,Enzo","Valhein,Rouie,Mina,Tel'Annas","Maloch,Raz,Murad,Zip",BRU
 2025-03-23,RPL 2025 Summer - GS,BRU,BAC,"Bolt Baron,Zuka,Mganga,Stuart,TeeMee","Florentino,Billow,Raz,Hayate,Baldum","Eland'orr,Maloch,Enzo,Dolia","Valhein,Marja,Liliana,Omen",BAC
 2025-03-23,RPL 2025 Summer - GS,BRU,BAC,"Florentino,Billow,Iggy,Hayate,Enzo","Qi,Fennik,Tulen,Stuart,TeeMee","Eland'orr,Maloch,Omen,Raz","Valhein,Marja,Liliana,Skud",BRU
+2025-03-23,AOG Spring 2025 GS1,BOX,BSS,"Airi,Zill,Liliana,Stuart,Wiro Sableng","Florentino,Keera,Raz,Elsu,Grakk","Bolt Baron,Valhein,Hayate,Fennik","Billow,Marja,Eland'orr,Nakroth",BOX
+2025-03-23,AOG Spring 2025 GS1,BOX,BSS,"Murad,Aoi,Rouie,Hayate,Roxie","Omen,Marja,Maloch,Capheny,Dolia","Bolt Baron,Stuart,Keera,Eland'orr","TeeMee,Valhein,Billow,Qi",BOX
+2025-03-23,AOG Spring 2025 GS1,BOX,BSS,"Bolt Baron,Fennik,Raz,Mina,Enzo","Yena,Billow,Tulen,Violet,TeeMee","Valhein,Stuart,Florentino,Murad","Maloch,Rouie,Marja,Eland'orr",BOX
+2025-03-23,GCS 2025 Spring GS,HKA,ONE,"Florentino,Zuka,Mganga,Violet,Toro","Yan,Aoi,Rouie,Stuart,Arduin","Valhein,Marja,Airi,Murad","Bolt Baron,Billow,Natalya,Ignis",ONE
+2025-03-23,GCS 2025 Spring GS,HKA,ONE,"Skud,Aoi,Liliana,Stuart,Omega","Riktor,Keera,Iggy,Violet,TeeMee","Rouie,Maloch,Mganga,Raz","Billow,Bolt Baron,Omen,Marja",ONE
+2025-03-23,GCS 2025 Spring GS,HKA,ONE,"Yena,Nakroth,Alice,Eland'orr,Maloch","Qi,Billow,Yue,Hayate,Enzo","TeeMee,Valhein,Raz,Natalya","Rouie,Bolt Baron,Stuart,Keera",ONE
+2025-03-23,GCS 2025 Spring GS,HKA,ONE,"Biron,Fennik,Raz,Hayate,TeeMee","Bolt Baron,Nakroth,Liliana,Elsu,Toro","Rouie,Valhein,Iggy,Eland'orr","Maloch,Stuart,Omen,Billow",HKA
 2025-03-23,RPL 2025 Summer - GS,KOG,FS,"Skud,Keera,Ignis,Fennik,Y'bneth","Ryoma,Nakroth,Raz,Valhein,Ming","Billow,Marja,Aoi,Mina","Eland'orr,Stuart,Florentino,Omen",FS
 2025-03-23,RPL 2025 Summer - GS,KOG,FS,"Qi,Bolt Baron,Rouie,Tel'Annas,Mina","Florentino,Eland'orr,Mganga,Hayate,Arduin","Billow,Raz,Ignis,Natalya","Valhein,Stuart,Murad,Marja",FS
 2025-03-23,RPL 2025 Summer - GS,KOG,FS,"Yena,Aoi,Maloch,Capheny,TeeMee","Riktor,Keera,Alice,Violet,Dolia","Billow,Raz,Florentino,Mina","Valhein,Rouie,Eland'orr,Bolt Baron",KOG
